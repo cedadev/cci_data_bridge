@@ -1,0 +1,94 @@
+{% extends "cci_data_bridge/base.html" %}
+
+{% block dataset-link %}<a class="nav-link active" href="{% url 'dataset-list'  %}">Datasets</a>{% endblock %}
+
+{% block content %}
+
+<h1 class="mt-2 mb-5">Dataset: <small>{{ object.url }}</small></h1>
+
+<h2>Dataset Provider: <small>{{ dataset.dataset_provider }}</small></h2>
+
+<h2 class="mt-5">ECVs:</h2>
+
+<ul>
+    {% for ecv in dataset.ecvs.all %}
+    <li>{{ ecv }}</li>
+    {% endfor %}
+</ul>
+
+{% if dataset.filters.all %}
+<h2 class="mt-5">Filters:</h2>
+
+<ul>
+    {% for filter in dataset.filters.all %}
+    <li>{{ filter }}</li>
+    {% endfor %}
+</ul>
+
+{% endif %}
+
+<h2 class="mt-5">Related Datasets</h2>
+
+<table id="related_datasets"
+    class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Relationship</th>
+            <th scope="col">Related Dataset</th>
+            <th scope="col">Filters</th>
+            <th scope="col">Description</th>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+
+    <tbody class="table-group-divider">
+    {% for relationship in relationships %}
+    <tr>
+        <td>
+        {% for relationship_type in relationship.relationships.all %}
+        {{ relationship_type }}
+
+        <i class="bi bi-info-circle"
+            aria-label="Information about {{ relationship_type }}"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            data-bs-container="body"
+            data-bs-delay='{"show":"200"}'
+            title="{{ relationship_type.description }}">
+        </i>
+        <br/>
+        {% endfor %} 
+        </td>
+
+        <td><a href="{{ relationship.to_dataset.url }}"
+            target="_blank" data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            data-bs-title="Go to the catalogue entry for this dataset. Opens a new window.">
+                {{ relationship.to_dataset.url }}</a></td>
+
+        <td><ul>
+        {% for filter in relationship.to_dataset.filters.all %}
+        {{ filter.name }} = {{ filter.value }}<br/>
+        {% endfor %}
+        </ul></td>
+        <td>{{ relationship.description }}</td>
+        <td>{{ relationship.to_dataset.start_date }}</td>
+        <td>{{ relationship.to_dataset.end_date }}</td>
+
+        <td><a class="btn btn-primary"
+            href={%url 'dataset-detail' relationship.to_dataset.pk %} role="button">More
+                Details About This Dataset</a></td>
+
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% autoescape off %}
+{{ plot_div }}
+{% endautoescape %}
+
+<p class="ms-5">View the full <a href="{% url 'sankey' object.url %}">Sankey Diagram</a> for the {{ object.url }} dataset</p>
+{% endblock %}

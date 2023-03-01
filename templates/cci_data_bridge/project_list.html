@@ -1,0 +1,24 @@
+{% extends "cci_data_bridge/base.html" %}
+{% block project-link %}
+<a class="nav-link active" href="{% url 'project-list'  %}">Projects</a>
+{% endblock %}
+
+{% block content %}
+<h1 class="mt-2 mb-4">Projects</h1>
+
+<table id="result_list"
+    class="table table-hover table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Project</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        {% for project in project_list %}
+        <tr>
+            <td><a href="{% url 'dataset-list' %}?provider={{project.name }}">{{ project.name }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

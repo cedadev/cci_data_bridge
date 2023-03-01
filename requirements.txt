@@ -1,0 +1,5 @@
+django-filter
+openpyxl
+django_extensions
+kaleido
+plotly

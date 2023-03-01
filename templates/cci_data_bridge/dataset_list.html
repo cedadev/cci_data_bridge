@@ -1,0 +1,118 @@
+{% extends "cci_data_bridge/base.html" %}
+
+{% block dataset-link %}<a class="nav-link active" href="{% url 'dataset-list'  %}">Datasets</a>{% endblock %}
+
+{% block content %}
+
+<h1 class="mt-2 mb-4">Datasets</h1>
+
+<table id="result_list"
+    class="table table-hover table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">
+                <form id="search-form" method="get">
+                    <div class="form-row">
+                        <div class="input-group">
+                            <input type="text" name="url"
+                                class="form-control"
+                                placeholder="Dataset URL"
+                                value="{{ search_value }}"
+                                aria-label="Dataset URL">
+                            <div class="input-group-append">
+                                <button
+                                    class="btn btn-outline-secondary"
+                                    type="submit">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </th>
+            <th scope="col"></th>
+
+            <th scope="col">
+                <div class="dropdown">
+                    <a class="btn btn-outline-secondary dropdown-toggle"
+                        href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">Filter on Provider</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="?provider=">---------------</a>
+                        <a class="dropdown-item"
+                            href="?provider=CCI+Open+Data+Portal">CCI
+                            Open Data Portal</a> <a class="dropdown-item"
+                            href="?provider=CCI+Archive+on+CEDA">CCI
+                            Archive on CEDA</a> <a class="dropdown-item"
+                            href="?provider=C3S+Climate+Data+Store">C3S
+                            Climate Data Store</a>
+                    </div>
+                </div>
+            </th>
+
+            <th scope="col">
+                <div class="dropdown">
+                    <a class="btn btn-outline-secondary dropdown-toggle"
+                        href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">Filter on ECV</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="?ecv=">---------------</a>
+                        {% for ecv in ecvs %}
+                        <a class="dropdown-item"
+                            href="?ecv={{ ecv }}">{{ ecv }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </th>
+            <th scope="col"></th>
+        </tr>
+
+        <tr>
+            <th scope="col">Dataset</th>
+            <th scope="col">Filters</th>
+            <th scope="col">Dataset Provider</th>
+            <th scope="col">ECVs</th>
+            <th scope="col"></th>
+        </tr>
+
+    </thead>
+    <tbody class="table-group-divider">
+        {% for dataset in dataset_list %}
+        <tr>
+            <td><a href="{{ dataset.url }}" target="_blank"
+                data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Go to the catalogue entry for this dataset. Opens a new window.">
+                    {{ dataset.url }}</a></td>
+            <td>
+            {% if dataset.filters.all %}
+                <table>
+                    {% for filter in dataset.filters.all %}
+                    <tr>
+                        <td>{{ filter }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            </td>
+
+            <td>{{ dataset.dataset_provider }}</td>
+
+            <td>
+                <table>
+                    {% for ecv in dataset.ecvs.all %}
+                    <tr>
+                        <td>{{ ecv }}</td>
+
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+
+            <td><a class="btn btn-primary"
+                href={%url 'dataset-detail' dataset.pk %} role="button">More
+                    Details</a></td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

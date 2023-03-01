@@ -1,0 +1,36 @@
+{% extends "cci_data_bridge/base.html" %}
+
+{% block sankey-link %}
+<a class="nav-link active" href="{% url 'sankey'  %}">Sankey Diagram</a>
+{% endblock %}
+
+{% block sankey-button %}
+<div class="dropdown clearfix">
+    <a class="btn btn-secondary dropdown-toggle float-end m-1" role="button"
+        data-bs-toggle="dropdown" aria-expanded="false">Select Dataset To View</a>
+
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <a class="dropdown-item" href="{%url 'sankey' 'c3s' %}">C3S</a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="{%url 'sankey' 'cci' %}">CCI</a>
+        </li>
+        {% for dataset in dataset_list %}
+        <li>
+            <a class="dropdown-item"
+            href="{% url 'sankey' dataset.url %}">{{ dataset.url }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endblock %}
+
+{% block content %}
+
+{% autoescape off %}
+{{ plot_div }}
+{% endautoescape %}
+
+{% endblock %}
