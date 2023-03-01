@@ -8,6 +8,8 @@ info:
 tags:
   - name: dataset
     description: Get data about dataset relationships.
+  - name: project
+    description: Get information about projects.
   - name: sankey
     description: Get a sanky diagram.
 
@@ -276,7 +278,7 @@ paths:
 
     get:
       tags:
-        - dataset
+        - project
       summary: Get a list of all projects.
       description: Retrieves a list of projects.
       operationId: getProjects

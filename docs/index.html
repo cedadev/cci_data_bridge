@@ -939,8 +939,9 @@ ul.nav-tabs {
                     <li data-group="Dataset" data-name="getDatasetsByURL" class="">
                       <a href="#api-Dataset-getDatasetsByURL">getDatasetsByURL</a>
                     </li>
-                    <li data-group="Dataset" data-name="getProjects" class="">
-                      <a href="#api-Dataset-getProjects">getProjects</a>
+                  <li class="nav-header" data-group="Project"><a href="#api-Project">API Methods - Project</a></li>
+                    <li data-group="Project" data-name="getProjects" class="">
+                      <a href="#api-Project-getProjects">getProjects</a>
                     </li>
                   <li class="nav-header" data-group="Sankey"><a href="#api-Sankey">API Methods - Sankey</a></li>
                     <li data-group="Sankey" data-name="getSankeyByProject" class="">
@@ -1820,8 +1821,11 @@ Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is 
                         </article>
                       </div>
                       <hr>
-                    <div id="api-Dataset-getProjects">
-                      <article id="api-Dataset-getProjects-0" data-group="User" data-name="getProjects" data-version="0">
+                  </section>
+                <section id="api-Project">
+                  <h1>Project</h1>
+                    <div id="api-Project-getProjects">
+                      <article id="api-Project-getProjects-0" data-group="User" data-name="getProjects" data-version="0">
                         <div class="pull-left">
                           <h1>getProjects</h1>
                           <p>Get a list of all projects.</p>
@@ -1837,41 +1841,41 @@ Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is 
                           <h3>Usage and SDK Samples</h3>
                         </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Dataset-getProjects-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Dataset-getProjects-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Dataset-getProjects-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Dataset-getProjects-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Dataset-getProjects-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-python">Python</a></li>
-                          <li class=""><a href="#examples-Dataset-getProjects-0-rust">Rust</a></li>
+                          <li class="active"><a href="#examples-Project-getProjects-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Project-getProjects-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Project-getProjects-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Project-getProjects-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Project-getProjects-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Project-getProjects-0-rust">Rust</a></li>
                         </ul>
 
                         <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Dataset-getProjects-0-curl">
+                          <div class="tab-pane active" id="examples-Project-getProjects-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: text/html,application/json" \
  "http://localhost/projects?format=html"
 </code></pre>
                           </div>
-                          <div class="tab-pane" id="examples-Dataset-getProjects-0-java">
+                          <div class="tab-pane" id="examples-Project-getProjects-0-java">
                             <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
 import org.openapitools.client.auth.*;
 import org.openapitools.client.model.*;
-import org.openapitools.client.api.DatasetApi;
+import org.openapitools.client.api.ProjectApi;
 
 import java.io.File;
 import java.util.*;
 
-public class DatasetApiExample {
+public class ProjectApiExample {
     public static void main(String[] args) {
 
         // Create an instance of the API class
-        DatasetApi apiInstance = new DatasetApi();
+        ProjectApi apiInstance = new ProjectApi();
         String format = html; // String | The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -1882,7 +1886,7 @@ Possible values are `html` and `json`. The default value is `html`.
             'String' result = apiInstance.getProjects(format);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DatasetApi#getProjects");
+            System.err.println("Exception when calling ProjectApi#getProjects");
             e.printStackTrace();
         }
     }
@@ -1890,12 +1894,12 @@ Possible values are `html` and `json`. The default value is `html`.
 </code></pre>
                           </div>
 
-                          <div class="tab-pane" id="examples-Dataset-getProjects-0-android">
-                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.DatasetApi;
+                          <div class="tab-pane" id="examples-Project-getProjects-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.ProjectApi;
 
-public class DatasetApiExample {
+public class ProjectApiExample {
     public static void main(String[] args) {
-        DatasetApi apiInstance = new DatasetApi();
+        ProjectApi apiInstance = new ProjectApi();
         String format = html; // String | The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -1906,21 +1910,21 @@ Possible values are `html` and `json`. The default value is `html`.
             'String' result = apiInstance.getProjects(format);
             System.out.println(result);
         } catch (ApiException e) {
-            System.err.println("Exception when calling DatasetApi#getProjects");
+            System.err.println("Exception when calling ProjectApi#getProjects");
             e.printStackTrace();
         }
     }
 }</code></pre>
                           </div>
   <!--
-  <div class="tab-pane" id="examples-Dataset-getProjects-0-groovy">
+  <div class="tab-pane" id="examples-Project-getProjects-0-groovy">
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-objc">
+                            <div class="tab-pane" id="examples-Project-getProjects-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">
 
 // Create an instance of the API class
-DatasetApi *apiInstance = [[DatasetApi alloc] init];
+ProjectApi *apiInstance = [[ProjectApi alloc] init];
 String *format = html; // The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -1940,11 +1944,11 @@ Possible values are `html` and `json`. The default value is `html`.
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-javascript">
+                            <div class="tab-pane" id="examples-Project-getProjects-0-javascript">
                               <pre class="prettyprint"><code class="language-js">var CciDataBridge = require('cci_data_bridge');
 
 // Create an instance of the API class
-var api = new CciDataBridge.DatasetApi()
+var api = new CciDataBridge.ProjectApi()
 var opts = {
   'format': html // {String} The response format.
 
@@ -1964,10 +1968,10 @@ api.getProjects(opts, callback);
 </code></pre>
                             </div>
 
-                            <!--<div class="tab-pane" id="examples-Dataset-getProjects-0-angular">
+                            <!--<div class="tab-pane" id="examples-Project-getProjects-0-angular">
               <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
             </div>-->
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-csharp">
+                            <div class="tab-pane" id="examples-Project-getProjects-0-csharp">
                               <pre class="prettyprint"><code class="language-cs">using System;
 using System.Diagnostics;
 using Org.OpenAPITools.Api;
@@ -1982,7 +1986,7 @@ namespace Example
         {
 
             // Create an instance of the API class
-            var apiInstance = new DatasetApi();
+            var apiInstance = new ProjectApi();
             var format = html;  // String | The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -1994,7 +1998,7 @@ Possible values are `html` and `json`. The default value is `html`.
                 'String' result = apiInstance.getProjects(format);
                 Debug.WriteLine(result);
             } catch (Exception e) {
-                Debug.Print("Exception when calling DatasetApi.getProjects: " + e.Message );
+                Debug.Print("Exception when calling ProjectApi.getProjects: " + e.Message );
             }
         }
     }
@@ -2002,12 +2006,12 @@ Possible values are `html` and `json`. The default value is `html`.
 </code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-php">
+                            <div class="tab-pane" id="examples-Project-getProjects-0-php">
                               <pre class="prettyprint"><code class="language-php"><&#63;php
 require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
-$api_instance = new OpenAPITools\Client\Api\DatasetApi();
+$api_instance = new OpenAPITools\Client\Api\ProjectApi();
 $format = html; // String | The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -2018,18 +2022,18 @@ try {
     $result = $api_instance->getProjects($format);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling DatasetApi->getProjects: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling ProjectApi->getProjects: ', $e->getMessage(), PHP_EOL;
 }
 ?></code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-perl">
+                            <div class="tab-pane" id="examples-Project-getProjects-0-perl">
                               <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
 use WWW::OPenAPIClient::Configuration;
-use WWW::OPenAPIClient::DatasetApi;
+use WWW::OPenAPIClient::ProjectApi;
 
 # Create an instance of the API class
-my $api_instance = WWW::OPenAPIClient::DatasetApi->new();
+my $api_instance = WWW::OPenAPIClient::ProjectApi->new();
 my $format = html; # String | The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -2041,11 +2045,11 @@ eval {
     print Dumper($result);
 };
 if ($@) {
-    warn "Exception when calling DatasetApi->getProjects: $@\n";
+    warn "Exception when calling ProjectApi->getProjects: $@\n";
 }</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-python">
+                            <div class="tab-pane" id="examples-Project-getProjects-0-python">
                               <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
 import time
 import openapi_client
@@ -2053,7 +2057,7 @@ from openapi_client.rest import ApiException
 from pprint import pprint
 
 # Create an instance of the API class
-api_instance = openapi_client.DatasetApi()
+api_instance = openapi_client.ProjectApi()
 format = html # String | The response format.
 
 This will override any value of `Accept` in the request headers.
@@ -2065,16 +2069,16 @@ try:
     api_response = api_instance.get_projects(format=format)
     pprint(api_response)
 except ApiException as e:
-    print("Exception when calling DatasetApi->getProjects: %s\n" % e)</code></pre>
+    print("Exception when calling ProjectApi->getProjects: %s\n" % e)</code></pre>
                             </div>
 
-                            <div class="tab-pane" id="examples-Dataset-getProjects-0-rust">
-                              <pre class="prettyprint"><code class="language-rust">extern crate DatasetApi;
+                            <div class="tab-pane" id="examples-Project-getProjects-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate ProjectApi;
 
 pub fn main() {
     let format = html; // String
 
-    let mut context = DatasetApi::Context::default();
+    let mut context = ProjectApi::Context::default();
     let result = client.getProjects(format, &context).wait();
 
     println!("{:?}", result);
@@ -2127,23 +2131,23 @@ Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is 
                             </table>
 
                           <h2>Responses</h2>
-                            <h3 id="examples-Dataset-getProjects-title-200"></h3>
-                            <p id="examples-Dataset-getProjects-description-200" class="marked"></p>
+                            <h3 id="examples-Project-getProjects-title-200"></h3>
+                            <p id="examples-Project-getProjects-description-200" class="marked"></p>
                             <script>
-                              var responseDataset200_description = `OK`;
-                              var responseDataset200_description_break = responseDataset200_description.indexOf('\n');
-                              if (responseDataset200_description_break == -1) {
-                                $("#examples-Dataset-getProjects-title-200").text("Status: 200 - " + responseDataset200_description);
+                              var responseProject200_description = `OK`;
+                              var responseProject200_description_break = responseProject200_description.indexOf('\n');
+                              if (responseProject200_description_break == -1) {
+                                $("#examples-Project-getProjects-title-200").text("Status: 200 - " + responseProject200_description);
                               } else {
-                                $("#examples-Dataset-getProjects-title-200").text("Status: 200 - " + responseDataset200_description.substring(0, responseDataset200_description_break));
-                                $("#examples-Dataset-getProjects-description-200").html(responseDataset200_description.substring(responseDataset200_description_break));
+                                $("#examples-Project-getProjects-title-200").text("Status: 200 - " + responseProject200_description.substring(0, responseProject200_description_break));
+                                $("#examples-Project-getProjects-description-200").html(responseProject200_description.substring(responseProject200_description_break));
                               }
                             </script>
 
 
-                            <ul id="responses-detail-Dataset-getProjects-200" class="nav nav-tabs nav-tabs-examples" >
+                            <ul id="responses-detail-Project-getProjects-200" class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-Dataset-getProjects-200-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-Project-getProjects-200-schema">Schema</a>
                                 </li>
 
 
@@ -2152,9 +2156,9 @@ Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is 
                             </ul>
 
 
-                            <div class="tab-content" id="responses-Dataset-getProjects-200-wrapper" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-Dataset-getProjects-200-schema">
-                                  <div id="responses-Dataset-getProjects-schema-200" class="exampleStyle">
+                            <div class="tab-content" id="responses-Project-getProjects-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Project-getProjects-200-schema">
+                                  <div id="responses-Project-getProjects-schema-200" class="exampleStyle">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = ;
@@ -2179,14 +2183,14 @@ Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is 
                                         }
 
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-Dataset-getProjects-200-schema-data').val(JSON.stringify(schema));
-                                        var result = $('#responses-Dataset-getProjects-schema-200');
+                                        $('#responses-Project-getProjects-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Project-getProjects-schema-200');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Dataset-getProjects-200-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-Project-getProjects-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
