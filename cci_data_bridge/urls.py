@@ -26,6 +26,9 @@ urlpatterns = [
     path("dataset/<int:pk>", views.DatasetDetailView.as_view(), name="dataset-detail"),
     path("dataset/<path:url>", views.DatasetUrlDetailView.as_view()),
     path("project/", views.ProjectListView.as_view(), name="project-list"),
+    path(
+        "relationtype/", views.RelationTypeListView.as_view(), name="relation-type-list"
+    ),
     path("sankey/", views.SankeyView.as_view(), name="sankey"),
     path("sankey/<slug:project>", views.SankeyProjectView.as_view(), name="sankey"),
     path("sankey/<path:url>", views.SankeyDatasetView.as_view(), name="sankey"),

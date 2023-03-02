@@ -874,6 +874,9 @@ ul.nav-tabs {
           <li class="nav-item">
             <a class="nav-link" href="{% url 'project-list'  %}">Projects</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'relation-type-list'  %}">Relation Types</a>
+          </li>
           <li class="nav-item active">
             <a id="cci_nav_link_3" class="nav-link" href="{% url 'docs-api'  %}">API Docs</a>
           </li>
@@ -951,6 +954,18 @@ ul.nav-tabs {
     }
   }
 };
+    defs["relation_types"] = {
+  "title" : "relation types",
+  "type" : "object",
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    }
+  }
+};
 
     var errs = {};
   </script>
@@ -979,6 +994,10 @@ ul.nav-tabs {
                   <li class="nav-header" data-group="Project"><a href="#api-Project">API Methods - Project</a></li>
                     <li data-group="Project" data-name="getProjects" class="">
                       <a href="#api-Project-getProjects">getProjects</a>
+                    </li>
+                  <li class="nav-header" data-group="Relationtype"><a href="#api-Relationtype">API Methods - Relationtype</a></li>
+                    <li data-group="Relationtype" data-name="getRelationTypes" class="">
+                      <a href="#api-Relationtype-getRelationTypes">getRelationTypes</a>
                     </li>
                   <li class="nav-header" data-group="Sankey"><a href="#api-Sankey">API Methods - Sankey</a></li>
                     <li data-group="Sankey" data-name="getSankeyByProject" class="">
@@ -2228,6 +2247,381 @@ Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is 
                                     </script>
                                   </div>
                                   <input id='responses-Project-getProjects-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
+                <section id="api-Relationtype">
+                  <h1>Relationtype</h1>
+                    <div id="api-Relationtype-getRelationTypes">
+                      <article id="api-Relationtype-getRelationTypes-0" data-group="User" data-name="getRelationTypes" data-version="0">
+                        <div class="pull-left">
+                          <h1>getRelationTypes</h1>
+                          <p>Get a list of all relation types.</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Retrieves a list of relation types.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/relationtypes</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Relationtype-getRelationTypes-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Relationtype-getRelationTypes-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Relationtype-getRelationTypes-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Relationtype-getRelationTypes-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Relationtype-getRelationTypes-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: text/html,application/json" \
+ "http://localhost/relationtypes?format=html"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.RelationtypeApi;
+
+import java.io.File;
+import java.util.*;
+
+public class RelationtypeApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        RelationtypeApi apiInstance = new RelationtypeApi();
+        String format = html; // String | The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+
+
+        try {
+            'String' result = apiInstance.getRelationTypes(format);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling RelationtypeApi#getRelationTypes");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.RelationtypeApi;
+
+public class RelationtypeApiExample {
+    public static void main(String[] args) {
+        RelationtypeApi apiInstance = new RelationtypeApi();
+        String format = html; // String | The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+
+
+        try {
+            'String' result = apiInstance.getRelationTypes(format);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling RelationtypeApi#getRelationTypes");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+RelationtypeApi *apiInstance = [[RelationtypeApi alloc] init];
+String *format = html; // The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+ (optional) (default to html)
+
+// Get a list of all relation types.
+[apiInstance getRelationTypesWith:format
+              completionHandler: ^('String' output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var CciDataBridge = require('cci_data_bridge');
+
+// Create an instance of the API class
+var api = new CciDataBridge.RelationtypeApi()
+var opts = {
+  'format': html // {String} The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getRelationTypes(opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getRelationTypesExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new RelationtypeApi();
+            var format = html;  // String | The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+ (optional)  (default to html)
+
+            try {
+                // Get a list of all relation types.
+                'String' result = apiInstance.getRelationTypes(format);
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling RelationtypeApi.getRelationTypes: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\RelationtypeApi();
+$format = html; // String | The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+
+
+try {
+    $result = $api_instance->getRelationTypes($format);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling RelationtypeApi->getRelationTypes: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::RelationtypeApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::RelationtypeApi->new();
+my $format = html; # String | The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+
+
+eval {
+    my $result = $api_instance->getRelationTypes(format => $format);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling RelationtypeApi->getRelationTypes: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.RelationtypeApi()
+format = html # String | The response format.
+
+This will override any value of `Accept` in the request headers.
+Possible values are `html` and `json`. The default value is `html`.
+ (optional) (default to html)
+
+try:
+    # Get a list of all relation types.
+    api_response = api_instance.get_relation_types(format=format)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling RelationtypeApi->getRelationTypes: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Relationtype-getRelationTypes-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate RelationtypeApi;
+
+pub fn main() {
+    let format = html; // String
+
+    let mut context = RelationtypeApi::Context::default();
+    let result = client.getRelationTypes(format, &context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">format</td>
+<td>
+
+
+    <div id="d2e199_getRelationTypes_format">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+The response format.
+
+This will override any value of &#x60;Accept&#x60; in the request headers.
+Possible values are &#x60;html&#x60; and &#x60;json&#x60;. The default value is &#x60;html&#x60;.
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-Relationtype-getRelationTypes-title-200"></h3>
+                            <p id="examples-Relationtype-getRelationTypes-description-200" class="marked"></p>
+                            <script>
+                              var responseRelationtype200_description = `OK`;
+                              var responseRelationtype200_description_break = responseRelationtype200_description.indexOf('\n');
+                              if (responseRelationtype200_description_break == -1) {
+                                $("#examples-Relationtype-getRelationTypes-title-200").text("Status: 200 - " + responseRelationtype200_description);
+                              } else {
+                                $("#examples-Relationtype-getRelationTypes-title-200").text("Status: 200 - " + responseRelationtype200_description.substring(0, responseRelationtype200_description_break));
+                                $("#examples-Relationtype-getRelationTypes-description-200").html(responseRelationtype200_description.substring(responseRelationtype200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Relationtype-getRelationTypes-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Relationtype-getRelationTypes-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Relationtype-getRelationTypes-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Relationtype-getRelationTypes-200-schema">
+                                  <div id="responses-Relationtype-getRelationTypes-schema-200" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = ;
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                          schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Relationtype-getRelationTypes-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Relationtype-getRelationTypes-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Relationtype-getRelationTypes-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>

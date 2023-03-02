@@ -25,7 +25,7 @@ from django.views.generic.list import ListView
 from plotly.offline import plot
 import plotly.graph_objects as go
 
-from cci_data_bridge.models import Dataset, ECV, Project, Relationship
+from cci_data_bridge.models import Dataset, ECV, Project, Relationship, RelationType
 
 
 SANKEY_COLOUR_1 = "rgba(230, 159, 0, 1.0)"
@@ -322,6 +322,20 @@ class ProjectListView(ListView):
                 data,
                 safe=False,
             )
+
+        return super().render_to_response(context)
+
+
+class RelationTypeListView(ListView):
+    model = RelationType
+
+    def render_to_response(self, context):
+        # Look for a 'format=json' GET argument
+        if (
+            self.request.GET.get("format") == "json"
+            or self.request.content_type == "application/json"
+        ):
+            return JsonResponse((list(context["object_list"].values())), safe=False)
 
         return super().render_to_response(context)
 

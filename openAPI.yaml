@@ -10,6 +10,8 @@ tags:
     description: Get data about dataset relationships.
   - name: project
     description: Get information about projects.
+  - name: relationtype
+    description: Get information about relation types.
   - name: sankey
     description: Get a sanky diagram.
 
@@ -118,6 +120,25 @@ components:
             items:
               description: Project name.
               type: string
+
+    relationtype_list:
+      description: "OK"
+      content:
+        text/html:
+          schema:
+            $ref: "#/components/schemas/html"
+        application/json:
+          schema:
+            description: A list of relation types.
+            type: array
+            items:
+              title: relation types
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
 
     error_message:
       description: The provided parameters are incorrect.
@@ -284,4 +305,20 @@ paths:
       operationId: getProjects
       responses:
         "200":
-          $ref: "#/components/responses/dataset_list"
+          $ref: "#/components/responses/project_list"
+
+
+  # List all relation types
+  /relationtypes:
+    parameters:
+      - $ref: "#/components/parameters/format_param"
+
+    get:
+      tags:
+        - relationtype
+      summary: Get a list of all relation types.
+      description: Retrieves a list of relation types.
+      operationId: getRelationTypes
+      responses:
+        "200":
+          $ref: "#/components/responses/relationtype_list"

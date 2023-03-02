@@ -39,6 +39,9 @@
                     {% block project-link %}<a class="nav-link" href="{% url 'project-list'  %}">Projects</a>{% endblock %}
                 </li>
                  <li class="nav-item">
+                    {% block relation-type-link %}<a class="nav-link" href="{% url 'relation-type-list'  %}">Relation Types</a>{% endblock %}
+                </li>
+                 <li class="nav-item">
                     {% block docs-link %}<a class="nav-link" href="{% url 'docs-api'  %}">API Docs</a>{% endblock %}
                 </li>
            </ul>

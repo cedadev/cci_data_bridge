@@ -145,6 +145,6 @@ LOGGING = {
 
 try:
     # pylint: disable=wildcard-import, unused-wildcard-import
-    from doi_site.local_settings import *
+    from cci_data_bridge.local_settings import *
 except ImportError:
     pass

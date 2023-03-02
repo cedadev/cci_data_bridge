@@ -1,0 +1,26 @@
+{% extends "cci_data_bridge/base.html" %}
+{% block relation-type-link %}
+<a class="nav-link active" href="{% url 'relation-type-list'  %}">Relation Types</a>
+{% endblock %}
+
+{% block content %}
+<h1 class="mt-2 mb-4">Relation Types</h1>
+
+<table id="result_list"
+    class="table table-hover table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Relation Type</th>
+            <th scope="col">Description</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        {% for relationtype in relationtype_list %}
+        <tr>
+            <td>{{ relationtype.name }}</td>
+            <td>{{ relationtype.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
