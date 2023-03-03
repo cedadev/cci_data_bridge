@@ -459,6 +459,11 @@ class SankeyDatasetView(ImageResponseMixin, TemplateView):
 
 
 class SankeyDiagram:
+    """
+    Produce a Sankey diagram.
+
+    """
+
     def __init__(self, datasets, title):
         self.datasets = datasets
         self.title = title
@@ -509,82 +514,135 @@ class SankeyDiagram:
         for dataset in self.datasets:
             # loop round all of the dataset(s)
             # this could be all datasets for a URL, all CS3 datasets or all CCI datasets
+
             for relationship in dataset.relationship_set.all():
+                # now loop round all of the relationships for this dataset
                 source_index = self._get_index(
                     dataset.url, f"Dataset: {dataset}", SANKEY_COLOUR_1
                 )
                 last_colour = SANKEY_COLOUR_1.replace("1.0", SANKEY_FADE)
 
                 if len(dataset.filters.all()) == 0:
-                    # No filters, direct link from C3S to CEDA datasets
-                    for related_ds in dataset.related_datasets.all():
-                        target_index = self._get_index(
-                            related_ds.url, f"Dataset: {related_ds}", SANKEY_COLOUR_1
+                    # No filters on the prime datasets
+                    related_ds = relationship.to_dataset
+                    if len(related_ds.filters.all()) > 0:
+                        filter_index = self._add_filters(
+                            related_ds,
+                            source_index,
+                            source,
+                            target,
+                            value,
+                            last_colour,
+                            relationship,
                         )
-                        source.append(source_index)
-                        target.append(target_index)
-                        value.append(1)
-                        self.link_colours.append(last_colour)
-                        self.link_names.append(str(relationship))
+                    else:
+                        filter_index = source_index
+
+                    target_index = self._get_index(
+                        related_ds.url, f"Dataset: {related_ds}", SANKEY_COLOUR_1
+                    )
+                    source.append(filter_index)
+                    target.append(target_index)
+                    value.append(1)
+                    self.link_colours.append(last_colour)
+                    self.link_names.append(str(relationship))
 
                 else:
-                    filter_indecies = []
-                    first_index = source_index
+                    # Filters on the prime datasets
+                    primary_filter_index = self._add_filters(
+                        dataset,
+                        source_index,
+                        source,
+                        target,
+                        value,
+                        last_colour,
+                        relationship,
+                    )
 
-                    # get the filters for the dataset
-                    filters = list(dataset.filters.all())
-                    filters.sort(key=_filter_sorter)
-                    for filter_ in filters:
-                        if filter_.name in [
-                            "processinglevel",
-                            "processing_level",
-                            "origin",
-                        ]:
-                            colour = SANKEY_COLOUR_2
-                        elif filter_.name == "version":
-                            colour = SANKEY_COLOUR_3
-                        elif filter_.name.startswith("sensor"):
-                            colour = SANKEY_COLOUR_4
-                        elif filter_.name == "variable":
-                            colour = SANKEY_COLOUR_5
-                        elif filter_.name.startswith(
-                            "algorithm"
-                        ) or filter_.name.startswith("projection"):
-                            colour = SANKEY_COLOUR_6
-                        else:
-                            colour = SANKEY_COLOUR_7
+                    related_ds = relationship.to_dataset
 
-                        filter_index = self._get_index(
-                            str(filter_),
-                            f"Dataset filter: {filter_}",
-                            colour,
-                            first_index,
+                    if len(related_ds.filters.all()) > 0:
+                        filter_index = self._add_filters(
+                            related_ds,
+                            primary_filter_index,
+                            source,
+                            target,
+                            value,
+                            last_colour,
+                            relationship,
                         )
-                        filter_indecies.append(filter_index)
+                    else:
+                        filter_index = primary_filter_index
 
-                        source.append(first_index)
-                        target.append(filter_index)
-                        value.append(1)
-
-                        self.link_colours.append(last_colour)
-                        last_colour = colour.replace("1.0", SANKEY_FADE)
-                        self.link_names.append(str(relationship))
-                        first_index = filter_index
-
-                    for related_ds in dataset.related_datasets.all():
-                        target_index = self._get_index(
-                            related_ds.url, f"Dataset: {related_ds}"
-                        )
-                        source.append(first_index)
-                        target.append(target_index)
-                        value.append(1)
-                        self.link_colours.append(last_colour)
-                        self.link_names.append(str(relationship))
+                    target_index = self._get_index(
+                        related_ds.url, f"Dataset: {related_ds}"
+                    )
+                    source.append(filter_index)
+                    target.append(target_index)
+                    value.append(1)
+                    self.link_colours.append(last_colour)
+                    self.link_names.append(str(relationship))
 
         return source, target, value
 
+    def _add_filters(
+        self, dataset, source_index, source, target, value, last_colour, relationship
+    ):
+        # we need to include the filters in the diagram
+        # filter_indecies = []
+        first_index = source_index
+
+        # get the filters for the dataset
+        filters = list(dataset.filters.all())
+        filters.sort(key=_filter_sorter)
+
+        for filter_ in filters:
+            if filter_.name in [
+                "processinglevel",
+                "processing_level",
+                "origin",
+            ]:
+                colour = SANKEY_COLOUR_2
+            elif filter_.name == "version":
+                colour = SANKEY_COLOUR_3
+            elif filter_.name.startswith("sensor"):
+                colour = SANKEY_COLOUR_4
+            elif filter_.name == "variable":
+                colour = SANKEY_COLOUR_5
+            elif filter_.name.startswith("algorithm") or filter_.name.startswith(
+                "projection"
+            ):
+                colour = SANKEY_COLOUR_6
+            else:
+                colour = SANKEY_COLOUR_7
+
+            filter_index = self._get_index(
+                str(filter_),
+                f"Dataset filter: {filter_}",
+                colour,
+                first_index,
+            )
+            # filter_indecies.append(filter_index)
+
+            source.append(first_index)
+            target.append(filter_index)
+            value.append(1)
+
+            self.link_colours.append(last_colour)
+            last_colour = colour.replace("1.0", SANKEY_FADE)
+            self.link_names.append(str(relationship))
+            first_index = filter_index
+
+        return first_index
+
+    # , source, target, value, last_colour
+
     def _get_index(self, value, node_name, colour=None, source_entity=None):
         """
+        Get the index for a given value.
+
+        If this is a new value then store some information about this value,
+        otherwise store information about the link.
 
         @param value(str): this may be a dataset URL or filter name
 
@@ -667,9 +725,12 @@ class SankeyDiagram:
         elif len(source) < 120:
             font_size = 10
             height = 1500
-        else:
+        elif len(source) < 200:
             font_size = 10
             height = 2000
+        else:
+            font_size = 10
+            height = 3000
 
         fig.update_layout(
             title_text=self.title,
