@@ -4,3 +4,5 @@ django-filter
 kaleido
 openpyxl
 plotly
+pytz
+sqlparse
