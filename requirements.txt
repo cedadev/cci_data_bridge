@@ -1,3 +1,4 @@
+asgiref
 Django==3.2
 django_extensions
 django-filter
