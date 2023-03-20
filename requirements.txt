@@ -2,8 +2,11 @@ asgiref
 Django==3.2
 django_extensions
 django-filter
+et-xmlfile
 kaleido
 openpyxl
 plotly
 pytz
 sqlparse
+tenacity
+typing-extensions
