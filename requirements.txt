@@ -1,5 +1,6 @@
-django-filter
-openpyxl
+Django==3.2
 django_extensions
+django-filter
 kaleido
+openpyxl
 plotly
