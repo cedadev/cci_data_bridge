@@ -6,6 +6,7 @@ et-xmlfile
 kaleido
 openpyxl
 plotly
+psycopg2-binary
 pytz
 sqlparse
 tenacity
