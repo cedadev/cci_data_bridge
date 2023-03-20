@@ -5,6 +5,7 @@ django-filter
 et-xmlfile
 kaleido
 openpyxl
+packaging
 plotly
 psycopg2-binary
 pytz
