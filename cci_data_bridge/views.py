@@ -341,7 +341,7 @@ class RelationTypeListView(ListView):
 
 
 class SankeyView(RedirectView):
-    url = "/sankey/c3s"
+    url = "/sankey/cci"
 
 
 class SankeyProjectView(ImageResponseMixin, TemplateView):
