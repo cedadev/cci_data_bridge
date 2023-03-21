@@ -2,7 +2,7 @@ openapi: 3.0.2
 servers:
   - url: http://localhost
 info:
-  description: This service provides data about the relationships between CCI and S3C datasets.
+  description: This service provides data about the relationships between CCI and C3S datasets.
   title: CCI Data Bridge
   version: 0.0.1
 tags:
