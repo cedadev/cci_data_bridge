@@ -2,6 +2,14 @@
 
 {% block dataset-link %}<a class="nav-link active" href="{% url 'dataset-list'  %}">Datasets</a>{% endblock %}
 
+{% block json-link %}
+{% if '?' in request.get_full_path %}
+<a class="nav-link active" href="{{ request.get_full_path }}&format=json">View as JSON</a>
+{% else %}     
+<a class="nav-link active" href="{{ request.get_full_path }}?format=json">View as JSON</a>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 
 <h1 class="mt-2 mb-4">Datasets</h1>

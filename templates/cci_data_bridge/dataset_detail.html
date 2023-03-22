@@ -2,6 +2,10 @@
 
 {% block dataset-link %}<a class="nav-link active" href="{% url 'dataset-list'  %}">Datasets</a>{% endblock %}
 
+{% block json-link %}
+<a class="nav-link active" href="{% url 'dataset-detail' dataset.id %}?format=json">View as JSON</a>
+{% endblock %}
+
 {% block content %}
 
 <h1 class="mt-2 mb-5">Dataset: <small>{{ object.url }}</small></h1>
