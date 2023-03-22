@@ -117,18 +117,31 @@ class JSONResponseMixin:
 
         combiened_relationships = {}
         for rel in relationships:
+            # do we have an entry for this dataset id?
             if rel.to_dataset.id in combiened_relationships.keys():
+                # add to existing data
                 combiened_relationships[rel.to_dataset.id]["relationship_types"].append(
                     str(rel)
                 )
             else:
+                # generate new relationship
                 relationship = {
                     "relationship_types": [str(rel)],
                     "related_dataset": str(rel.to_dataset),
-                    "related_dataset_start_date": rel.to_dataset.start_date,
-                    "related_dataset_end_date": rel.to_dataset.end_date,
-                    "description": rel.description,
                 }
+
+                if rel.to_dataset.start_date is not None:
+                    relationship[
+                        "related_dataset_start_date"
+                    ] = rel.to_dataset.start_date
+
+                if rel.to_dataset.end_date is not None:
+                    relationship["related_dataset_end_date"] = rel.to_dataset.end_date
+
+                relationship[
+                    "related_dataset_provider"
+                ] = rel.to_dataset.dataset_provider.name
+                relationship["description"] = rel.description
                 combiened_relationships[rel.to_dataset.id] = relationship
 
             filters = []
@@ -136,9 +149,6 @@ class JSONResponseMixin:
                 filters.append({filter_.name: filter_.value})
             if len(filters) > 0:
                 relationship["filters"] = filters
-
-            relationship["related_dataset_start_date"] = rel.to_dataset.start_date
-            relationship["related_dataset_end_date"] = rel.to_dataset.end_date
 
         data["relationships"] = list(combiened_relationships.values())
         return data
