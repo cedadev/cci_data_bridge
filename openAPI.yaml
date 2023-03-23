@@ -293,7 +293,7 @@ paths:
 
 
   # List all projects
-  /projects:
+  /project:
     parameters:
       - $ref: "#/components/parameters/format_param"
 
@@ -309,7 +309,7 @@ paths:
 
 
   # List all relation types
-  /relationtypes:
+  /relationtype:
     parameters:
       - $ref: "#/components/parameters/format_param"
 

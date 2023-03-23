@@ -2,6 +2,9 @@
 {% block relation-type-link %}
 <a class="nav-link active" href="{% url 'relation-type-list'  %}">Relation Types</a>
 {% endblock %}
+{% block json-link %}
+<a class="nav-link active" href="{% url 'relation-type-list' %}?format=json">View as JSON</a>
+{% endblock %}
 
 {% block content %}
 <h1 class="mt-2 mb-4">Relation Types</h1>

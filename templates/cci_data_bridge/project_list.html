@@ -2,6 +2,9 @@
 {% block project-link %}
 <a class="nav-link active" href="{% url 'project-list'  %}">Projects</a>
 {% endblock %}
+{% block json-link %}
+<a class="nav-link active" href="{% url 'project-list' %}?format=json">View as JSON</a>
+{% endblock %}
 
 {% block content %}
 <h1 class="mt-2 mb-4">Projects</h1>
