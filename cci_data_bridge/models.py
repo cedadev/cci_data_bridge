@@ -24,7 +24,7 @@ class Filter(models.Model):
 
     value = models.CharField(
         "Parameter value",
-        max_length=50,
+        max_length=150,
         help_text="Value of the parameter.",
         blank=False,
         null=False,
@@ -102,8 +102,7 @@ class RelationType(models.Model):
         primary_key=True,
     )
 
-    description = models.CharField(
-        max_length=100,
+    description = models.TextField(
         blank=True,
     )
 
@@ -125,8 +124,7 @@ class Relationship(models.Model):
         related_name="linked_dataset",
     )
 
-    description = models.CharField(
-        max_length=100,
+    description = models.TextField(
         blank=True,
     )
 
