@@ -1,6 +1,6 @@
 openapi: 3.0.2
 servers:
-  - url: http://127.0.0.1:8000
+  - url: https://eo-data-bridge.ceda.ac.uk
 info:
   description: This service provides data about the relationships between CCI and C3S datasets.
   title: CCI Data Bridge
