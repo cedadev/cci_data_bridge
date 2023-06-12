@@ -1,0 +1,29 @@
+{% extends "cci_data_bridge/base.html" %}
+{% block content %}
+<h1 class="mt-2 mb-4">Data Bridge Service</h1>
+{% load static %}
+<p>The Data Bridge is a service that is aimed to solve the problem
+    of tracking between related datasets within CCI and C3S. Many of the
+    ECV datasets that were initially produced under CCI, have been
+    either brokered, or go on to transition into an operational phase
+    within the Copernicus Climate Change Service. However, the exact
+    relationship between the data can vary between projects and can be
+    complex.</p>
+<p>A complication is that the way that a 'dataset' has been defined is 
+     generally different between CCI and C3S. In the case of C3S, the
+     DOI’d landing page in the C3S Climate Data Store, contains multiple
+     options that can be selected, some of which often correspond to the
+     CCI datasets; however, it is also the case that a CCI dataset may
+     also contain homogeneous subsets which are used separately. 
+     See <a href="{% url 'relation-type-list' %}">Relation Types</a> for
+     the list of terms currently used to define relationships.
+<p>From the <a href="{% url 'dataset-list'  %}">Datasets</a> page you can
+     select a dataset and then view information about related datasets.</p>
+<p>The <a href="{% url 'sankey'  %}">Sankey Diagram</a> page allows you to
+     view and download various diagrams depicting the relationships between
+     selected datasets.</p>
+<p>The <a href="{% url 'docs-api'  %}">API Docs</a> have been generated from
+     an <a href="{% static 'cci_data_bridge/openAPI.yaml' %}">Open API yaml
+     </a> file using Swagger UI. This docs page is an interactive page that
+     allows you to query the service via the API.</p>
+{% endblock %}

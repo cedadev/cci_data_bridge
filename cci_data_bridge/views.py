@@ -154,8 +154,8 @@ class JSONResponseMixin:
         return data
 
 
-class HomeView(RedirectView):
-    url = "/dataset/"
+class HomeView(TemplateView):
+    template_name = "cci_data_bridge/home.html"
 
 
 class DatasetListView(JSONResponseMixin, ListView):
