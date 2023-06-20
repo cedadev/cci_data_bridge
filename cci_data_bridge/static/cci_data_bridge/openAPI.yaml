@@ -150,6 +150,9 @@ components:
     image:
       description: OK
       content:
+        html:
+          schema:
+            type: string
         image/jpeg:
           schema:
             type: string
