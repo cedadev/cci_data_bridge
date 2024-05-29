@@ -78,6 +78,15 @@ def _write_providers():
     providers["CCI Archive on CEDA"] = Project.objects.create(
         name="CCI Archive on CEDA"
     )
+    providers["OSI SAF"] = Project.objects.create(
+        name="OSI SAF"
+    )
+    providers["CM SAF"] = Project.objects.create(
+        name="CM SAF"
+    )
+    providers["C3S"] = Project.objects.create(
+        name="C3S"
+    )
     return providers
 
 
