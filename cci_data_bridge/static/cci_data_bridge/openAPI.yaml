@@ -64,7 +64,7 @@ components:
       description: |
         The name of a project
         
-        Possible values are `cci` and `c3s`. The default value is `cci`.
+        Possible values are `cci`, `c3s` `cm` and `osi`. The default value is `cci`.
       name: project
       in: path
       required: true
@@ -73,6 +73,8 @@ components:
         enum: 
           - cci
           - c3s
+          - cm
+          - osi
         default: cci
         example: cci
 

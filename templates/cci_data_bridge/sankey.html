@@ -11,10 +11,16 @@
 
     <ul class="dropdown-menu dropdown-menu-end">
         <li>
-            <a class="dropdown-item" href="{%url 'sankey' 'c3s' %}">C3S</a>
+            <a class="dropdown-item" href="{%url 'sankey' 'c3s' %}">C3S Climate Data Store</a>
         </li>
         <li>
             <a class="dropdown-item" href="{%url 'sankey' 'cci' %}">CCI</a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="{%url 'sankey' 'cm' %}">CM SAF</a>
+        </li>
+        <li>
+            <a class="dropdown-item" href="{%url 'sankey' 'osi' %}">OSI SAF</a>
         </li>
         {% for dataset in dataset_list %}
         <li>

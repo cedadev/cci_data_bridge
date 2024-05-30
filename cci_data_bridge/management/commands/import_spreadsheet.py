@@ -84,9 +84,6 @@ def _write_providers():
     providers["CM SAF"] = Project.objects.create(
         name="CM SAF"
     )
-    providers["C3S"] = Project.objects.create(
-        name="C3S"
-    )
     return providers
 
 

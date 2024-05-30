@@ -398,6 +398,12 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
         elif project.lower() == "c3s":
             datasets = Dataset.objects.filter(dataset_provider="C3S Climate Data Store")
             project = "C3S"
+        elif project.lower() == "cm":
+            datasets = Dataset.objects.filter(dataset_provider="CM SAF")
+            project = "CM"
+        elif project.lower() == "osi":
+            datasets = Dataset.objects.filter(dataset_provider="OSI SAF")
+            project = "OSI"
         else:
             # could be an ecv
             datasets = Dataset.objects.filter(ecvs=project)
