@@ -1,4 +1,4 @@
 include cci_data_bridge/LICENSE
-recursive-include templates *.html
+recursive-include cci_data_bridge_templates *.html
 recursive-include cci_data_bridge *.css *.yaml *.svg *.woff *.woff2
 
