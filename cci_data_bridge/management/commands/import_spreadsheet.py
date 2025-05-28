@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from openpyxl import load_workbook
 
-from cci_data_bridge.models import (
+from data_bridge_app.models import (
     Dataset,
     ECV,
     Filter,

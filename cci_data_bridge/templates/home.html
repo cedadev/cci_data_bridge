@@ -1,4 +1,4 @@
-{% extends "cci_data_bridge/base.html" %}
+{% extends "base.html" %}
 {% block content %}
 <h1 class="mt-2 mb-4">Data Bridge Service</h1>
 {% load static %}
@@ -23,7 +23,7 @@
      view and download various diagrams depicting the relationships between
      selected datasets.</p>
 <p>The <a href="{% url 'docs-api'  %}">API Docs</a> have been generated from
-     an <a href="{% static 'cci_data_bridge/openAPI.yaml' %}">Open API yaml
+     an <a href="{% static 'openAPI.yaml' %}">Open API yaml
      </a> file using Swagger UI. This docs page is an interactive page that
      allows you to query the service via the API.</p>
 {% endblock %}

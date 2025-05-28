@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class ECV(models.Model):
     name = models.CharField(
         "ECV",

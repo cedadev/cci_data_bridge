@@ -14,23 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-
-from cci_data_bridge import views
-
+from django.urls import path, include
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", views.HomeView.as_view(), name="home"),
-    path("dataset/", views.DatasetListView.as_view(), name="dataset-list"),
-    path("dataset/<int:pk>", views.DatasetDetailView.as_view(), name="dataset-detail"),
-    path("dataset/<path:url>", views.DatasetUrlDetailView.as_view()),
-    path("project/", views.ProjectListView.as_view(), name="project-list"),
-    path(
-        "relationtype/", views.RelationTypeListView.as_view(), name="relation-type-list"
-    ),
-    path("sankey/", views.SankeyView.as_view(), name="sankey"),
-    path("sankey/<slug:project>", views.SankeyProjectView.as_view(), name="sankey"),
-    path("sankey/<path:url>", views.SankeyDatasetView.as_view(), name="sankey"),
-    path("docs/api", views.DocsApiView.as_view(), name="docs-api"),
+    path("", include('data_bridge_app.urls')),
 ]

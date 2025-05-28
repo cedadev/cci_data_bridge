@@ -25,7 +25,7 @@ from django.views.generic.list import ListView
 from plotly.offline import plot
 import plotly.graph_objects as go
 
-from cci_data_bridge.models import Dataset, ECV, Project, Relationship, RelationType
+from data_bridge_app.models import Dataset, ECV, Project, Relationship, RelationType
 
 
 SANKEY_COLOUR_1 = "rgba(230, 159, 0, 1.0)"
@@ -155,11 +155,12 @@ class JSONResponseMixin:
 
 
 class HomeView(TemplateView):
-    template_name = "cci_data_bridge/home.html"
+    template_name = "home.html"
 
 
 class DatasetListView(JSONResponseMixin, ListView):
     model = Dataset
+    template_name = 'dataset_list.html'
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -191,6 +192,7 @@ class DatasetListView(JSONResponseMixin, ListView):
 
 class DatasetDetailView(JSONResponseMixin, DetailView):
     model = Dataset
+    template = 'dataset_detail.html'
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -226,7 +228,7 @@ class DatasetUrlDetailView(JSONResponseMixin, ListView):
     """
 
     model = Dataset
-    template_name = "cci_data_bridge/dataset_list.html"
+    template_name = "dataset_list.html"
 
     def render_to_response(self, context):
         if len(context["dataset_list"]) == 0:
@@ -249,7 +251,7 @@ class DatasetUrlDetailView(JSONResponseMixin, ListView):
             context["plot_div"] = snakey_diagram.plot_div()
 
             return TemplateResponse(
-                self.request, "cci_data_bridge/dataset_detail.html", context
+                self.request, "dataset_detail.html", context
             )
 
         return super().render_to_response(context)
@@ -313,11 +315,12 @@ def get_queryset(url=None, filters=None, provider=None, ecv=None):
 
 
 class DocsApiView(TemplateView):
-    template_name = "cci_data_bridge/api_doc.html"
+    template_name = "api_doc.html"
 
 
 class ProjectListView(ListView):
     model = Project
+    template_name = "project_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -338,6 +341,7 @@ class ProjectListView(ListView):
 
 class RelationTypeListView(ListView):
     model = RelationType
+    template_name = "relationtype_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -352,10 +356,11 @@ class RelationTypeListView(ListView):
 
 class SankeyView(RedirectView):
     url = "/sankey/cci"
+    template_name = "sankey.html"
 
 
 class SankeyProjectView(ImageResponseMixin, TemplateView):
-    template_name = "cci_data_bridge/sankey.html"
+    template_name = "sankey.html"
 
     def render_to_response(self, context):
         # Look for a 'format=png' GET argument
@@ -409,7 +414,7 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
             datasets = Dataset.objects.filter(ecvs=project)
 
         if len(datasets.all()) == 0:
-            raise Http404(f"Project not found")
+            raise Http404(f"Project not found - Database empty")
 
         title = f"Sankey Diagram for {project} Datasets"
         snakey_diagram = SankeyDiagram(datasets, title)
@@ -424,7 +429,7 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
 
 
 class SankeyDatasetView(ImageResponseMixin, TemplateView):
-    template_name = "cci_data_bridge/sankey.html"
+    template_name = "sankey.html"
 
     def render_to_response(self, context):
         # Look for a 'format=png' GET argument
