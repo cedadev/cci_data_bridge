@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from cci_data_bridge.models import (
+from data_bridge_app.models import (
     Dataset,
     ECV,
     Filter,

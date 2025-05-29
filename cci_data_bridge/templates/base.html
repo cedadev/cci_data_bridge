@@ -1,5 +1,7 @@
 <!doctype html>
+{% load static %}
 <html lang="en">
+<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}" >
 
 <head>
 
@@ -13,9 +15,9 @@
 
 {% load static %}
 <link rel="stylesheet" type="text/css"
-    href="{% static 'cci_data_bridge/style.css' %}">
+    href="{% static 'style.css' %}">
 <link rel="stylesheet" type="text/css"
-    href="{% static 'cci_data_bridge/bootstrap-icons-1.9.1/bootstrap-icons.css' %}">
+    href="{% static 'bootstrap-icons-1.9.1/bootstrap-icons.css' %}">
 
 <title>{% block title %}CCI Data Bridge{% endblock %}</title>
 
