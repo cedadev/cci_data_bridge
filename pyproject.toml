@@ -17,6 +17,7 @@ dependencies = [
 
 [tool.poetry]
 packages = [
+    { include = 'cci_data_bridge' },
     { include = 'data_bridge_app' },
 ]
 include = [
