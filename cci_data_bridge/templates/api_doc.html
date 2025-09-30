@@ -1,4 +1,4 @@
-{% extends "cci_data_bridge/base.html" %}
+{% extends "base.html" %}
 
 {% block head %}
   <meta charset="utf-8" />
@@ -15,7 +15,7 @@
 <script>
   window.onload = () => {
     window.ui = SwaggerUIBundle({
-      url: "{% static 'cci_data_bridge/openAPI.yaml' %}",
+      url: "{% static 'openAPI.yaml' %}",
       dom_id: '#swagger-ui',
     });
   };

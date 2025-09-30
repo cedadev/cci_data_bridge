@@ -1,0 +1,32 @@
+[project]
+name = "cci-data-bridge"
+version = "0.1.0"
+description = "Prototype CCI Data Bridge Service"
+authors = [
+    {name = "Daniel Westwood",email = "daniel.westwood@stfc.ac.uk"}
+]
+license = {text = "BSD 3"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "django (>=5.2.1,<6.0.0)",
+    "django-extensions (>=4.1,<5.0)",
+    "plotly (>=6.1.1,<7.0.0)",
+    "whitenoise (>=6.9.0,<7.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "whitenoise (>=6.9.0,<7.0.0)",
+    "openpyxl (>=3.1.5,<4)"
+]
+
+[tool.poetry]
+packages = [
+    { include = 'cci_data_bridge' },
+    { include = 'data_bridge_app' },
+]
+include = [
+    { path = "static", format = ["sdist","wheel"]}
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
