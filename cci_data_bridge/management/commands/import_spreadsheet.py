@@ -24,14 +24,27 @@ PROVIDER_2 = 10
 ECV_2 = 11
 DESCRIPTION = 12
 
+def get_from_github():
+    import requests
+
+    print('Downloading from source')
+    link = 'https://github.com/cedadev/cci_data_bridge_inputs/raw/8d450b0cbd470a1555ee1d0dbbc68b0874c9f2f1/EEE2000-metadata_mapping.xlsx'
+
+    resp = requests.get(link)
+    with open('testfile.xlsx','wb') as f:
+        f.write(resp.content)
+
+    return 'testfile.xlsx'
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument("excel_wb", type=str, help="The excel workbook to import")
+        parser.add_argument("excel_wb", type=str, help="The excel workbook to import", default=None,nargs="?")
 
     def handle(self, **options):
         print("Import data from spreadsheet")
-        excel_wb = options["excel_wb"]
+        excel_wb = options.get("excel_wb")
+        if not excel_wb:
+            excel_wb = get_from_github()
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
@@ -150,6 +163,7 @@ def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
         # add end date
         if row[END_DATE_1].value is not None:
             ds_1.end_date = row[END_DATE_1].value
+            #print(x, ds_1.end_date)
             ds_1.save()
 
         # add ECVs
