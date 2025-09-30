@@ -31,10 +31,10 @@ def get_from_github():
     link = 'https://github.com/cedadev/cci_data_bridge_inputs/raw/8d450b0cbd470a1555ee1d0dbbc68b0874c9f2f1/EEE2000-metadata_mapping.xlsx'
 
     resp = requests.get(link)
-    with open('testfile.xlsx','wb') as f:
+    with open('/tmp/testfile.xlsx','wb') as f:
         f.write(resp.content)
 
-    return 'testfile.xlsx'
+    return '/tmp/testfile.xlsx'
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
