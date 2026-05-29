@@ -38,14 +38,13 @@ def get_from_github(dir: str):
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument("excel_wb", type=str, help="The excel workbook to import", default=None,nargs="?")
-        parser.add_argument("dir", type=str, help="Temp Directory", default="/tmp")
+        parser.add_argument("--excel_wb", dest="excel_wb", type=str, help="The excel workbook to import", default=None,nargs="?")
+        parser.add_argument("--dir", dest="dir", type=str, help="Temp Directory", default="/tmp")
 
-    def handle(self, **options):
+    def handle(self, dir: str, excel_wb: str | None, **kwargs):
         print("Import data from spreadsheet")
-        excel_wb = options.get("excel_wb")
         if not excel_wb:
-            excel_wb = get_from_github(options.get(dir))
+            excel_wb = get_from_github(dir)
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
