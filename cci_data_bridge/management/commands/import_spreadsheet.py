@@ -24,27 +24,28 @@ PROVIDER_2 = 10
 ECV_2 = 11
 DESCRIPTION = 12
 
-def get_from_github():
+def get_from_github(dir: str):
     import requests
 
     print('Downloading from source')
     link = 'https://github.com/cedadev/cci_data_bridge_inputs/raw/8d450b0cbd470a1555ee1d0dbbc68b0874c9f2f1/EEE2000-metadata_mapping.xlsx'
 
     resp = requests.get(link)
-    with open('/tmp/testfile.xlsx','wb') as f:
+    with open(f'{dir}/testfile.xlsx','wb') as f:
         f.write(resp.content)
 
-    return '/tmp/testfile.xlsx'
+    return f'{dir}/testfile.xlsx'
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("excel_wb", type=str, help="The excel workbook to import", default=None,nargs="?")
+        parser.add_argument("dir", type=str, help="Temp Directory", default="/tmp")
 
     def handle(self, **options):
         print("Import data from spreadsheet")
         excel_wb = options.get("excel_wb")
         if not excel_wb:
-            excel_wb = get_from_github()
+            excel_wb = get_from_github(options.get(dir))
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
