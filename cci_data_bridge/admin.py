@@ -1,8 +1,10 @@
+from django import forms
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from data_bridge_app.models import (
-    Dataset,
     ECV,
+    Dataset,
     Filter,
     Project,
     Relationship,
@@ -10,9 +12,23 @@ from data_bridge_app.models import (
 )
 
 
-class RelationshipInline(admin.TabularInline):
+class RelationshipInlineForm(forms.ModelForm):
+
+    class Meta:
+        model = Relationship
+        fields = (
+            "target_content_type",
+            "target_object_pk",
+            "relationships",
+            "description",
+        )
+
+
+class OutgoingRelationshipInline(GenericTabularInline):
     model = Relationship
-    fk_name = "from_dataset"
+    form = RelationshipInlineForm
+    ct_field = "source_content_type"
+    ct_fk_field = "source_object_pk"
     extra = 0
 
 
@@ -22,7 +38,7 @@ class DatasetAdmin(admin.ModelAdmin):
         "url",
         "dataset_provider",
     )
-    inlines = [RelationshipInline]
+    inlines = [OutgoingRelationshipInline]
 
 
 @admin.register(ECV)
@@ -37,7 +53,12 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Relationship)
 class RelationshipAdmin(admin.ModelAdmin):
-    list_display = ("from_dataset", "to_dataset")
+    list_display = (
+        "source",
+        "source_type",
+        "target",
+        "target_type",
+    )
 
 
 @admin.register(RelationType)

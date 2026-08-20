@@ -13,6 +13,8 @@ dataset for the url then display a detail view, otherwise display a list of data
 
 """
 
+import plotly.graph_objects as go
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.http.response import HttpResponse
@@ -23,10 +25,8 @@ from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from plotly.offline import plot
-import plotly.graph_objects as go
 
-from data_bridge_app.models import Dataset, ECV, Project, Relationship, RelationType
-
+from data_bridge_app.models import ECV, Ai, Dataset, Project, Relationship, RelationType
 
 SANKEY_COLOUR_1 = "rgba(230, 159, 0, 1.0)"
 SANKEY_COLOUR_2 = "rgba(86, 180, 233, 1.0)"
@@ -78,22 +78,51 @@ class JSONResponseMixin:
         """
         if context.get("object") is not None:
             return JsonResponse(
-                self.get_j_data(context["object"], context["relationships"]),
+                self.get_j_data(
+                    context,
+                ),
                 safe=False,
             )
 
         data = []
         for obj in context["object_list"]:
-            data.append(
-                self.get_j_data(obj, Relationship.objects.filter(from_dataset=obj))
-            )
+            data.append(self.get_j_data({"object": obj}))
 
         return JsonResponse(
             data,
             safe=False,
         )
 
-    def get_j_data(self, dataset, relationships):
+    def get_j_data(self, context):
+        if isinstance(context["object"], Ai):
+            return self.get_ai_json(context["object"])
+
+        return self.get_dataset_json(context["object"])
+
+    def get_ai_json(self, ai):
+        """
+        Returns an object that will be serialized as JSON by json.dumps().
+
+        """
+        data = {}
+        data["type"] = {"name": ai.type.name, "category": ai.type.category.name}
+        data["use"] = ai.use.name
+        data["relationships"] = self.get_dataset_relationship_json(
+            dataset_relationships=ai.outgoing_relationships.filter(
+                target_content_type=ContentType.objects.get_for_model(Dataset),
+            )
+        )
+        data["relationships"].extend(
+            self.get_project_relationship_json(
+                project_relationships=ai.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(Project),
+                ),
+            )
+        )
+
+        return data
+
+    def get_dataset_json(self, dataset):
         """
         Returns an object that will be serialized as JSON by json.dumps().
 
@@ -115,43 +144,105 @@ class JSONResponseMixin:
         if len(filters) > 0:
             data["filters"] = filters
 
+        data["relationships"] = self.get_dataset_relationship_json(
+            dataset_relationships=dataset.outgoing_relationships.filter(
+                target_content_type=ContentType.objects.get_for_model(Dataset),
+            )
+        )
+
+        data["relationships"].extend(
+            self.get_ai_relationship_json(
+                ai_relationships=dataset.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(Ai),
+                ),
+            )
+        )
+
+        return data
+
+    def get_dataset_relationship_json(self, dataset_relationships):
+
         combiened_relationships = {}
-        for rel in relationships:
+        for rel in dataset_relationships:
             # do we have an entry for this dataset id?
-            if rel.to_dataset.id in combiened_relationships.keys():
+            if rel.target.id in combiened_relationships.keys():
                 # add to existing data
-                combiened_relationships[rel.to_dataset.id]["relationship_types"].append(
+                combiened_relationships[rel.target.id]["relationship_types"].append(
                     str(rel)
                 )
             else:
                 # generate new relationship
                 relationship = {
                     "relationship_types": [str(rel)],
-                    "related_dataset": str(rel.to_dataset),
+                    "related_dataset": str(rel.target),
                 }
 
-                if rel.to_dataset.start_date is not None:
-                    relationship[
-                        "related_dataset_start_date"
-                    ] = rel.to_dataset.start_date
+                if rel.target.start_date is not None:
+                    relationship["related_dataset_start_date"] = rel.target.start_date
 
-                if rel.to_dataset.end_date is not None:
-                    relationship["related_dataset_end_date"] = rel.to_dataset.end_date
+                if rel.target.end_date is not None:
+                    relationship["related_dataset_end_date"] = rel.target.end_date
 
-                relationship[
-                    "related_dataset_provider"
-                ] = rel.to_dataset.dataset_provider.name
+                relationship["related_dataset_provider"] = (
+                    rel.target.dataset_provider.name
+                )
                 relationship["description"] = rel.description
-                combiened_relationships[rel.to_dataset.id] = relationship
+                combiened_relationships[rel.target.id] = relationship
 
             filters = []
-            for filter_ in rel.to_dataset.filters.all():
+            for filter_ in rel.target.filters.all():
                 filters.append({filter_.name: filter_.value})
             if len(filters) > 0:
                 relationship["filters"] = filters
 
-        data["relationships"] = list(combiened_relationships.values())
-        return data
+        return list(combiened_relationships.values())
+
+    def get_ai_relationship_json(self, ai_relationships):
+
+        combiened_relationships = {}
+
+        for rel in ai_relationships:
+            # do we have an entry for this ai id?
+            if rel.target.id in combiened_relationships.keys():
+                # add to existing data
+                combiened_relationships[rel.target.id]["relationship_types"].append(
+                    str(rel)
+                )
+            else:
+                # generate new relationship
+                relationship = {
+                    "relationship_types": [str(rel)],
+                    "related_ai_type": {
+                        "name": rel.target.type.name,
+                        "category": rel.target.type.category.name,
+                    },
+                    "related_ai_use": rel.target.use.name,
+                }
+
+                combiened_relationships[rel.target.id] = relationship
+
+        return list(combiened_relationships.values())
+
+    def get_project_relationship_json(self, project_relationships):
+
+        combiened_relationships = {}
+        for rel in project_relationships:
+            # do we have an entry for this ai id?
+            if rel.target.pk in combiened_relationships.keys():
+                # add to existing data
+                combiened_relationships[rel.target.id]["relationship_types"].append(
+                    str(rel)
+                )
+            else:
+                # generate new relationship
+                relationship = {
+                    "relationship_types": [str(rel)],
+                    "related_project": rel.target.name,
+                }
+
+                combiened_relationships[rel.target.pk] = relationship
+
+        return list(combiened_relationships.values())
 
 
 class HomeView(TemplateView):
@@ -160,7 +251,7 @@ class HomeView(TemplateView):
 
 class DatasetListView(JSONResponseMixin, ListView):
     model = Dataset
-    template_name = 'dataset_list.html'
+    template_name = "dataset_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -182,7 +273,7 @@ class DatasetListView(JSONResponseMixin, ListView):
         provider = self.request.GET.get("provider")
         ecv = self.request.GET.get("ecv")
 
-        return get_queryset(url, filters, provider, ecv)
+        return get_dataset_queryset(url, filters, provider, ecv)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -192,7 +283,7 @@ class DatasetListView(JSONResponseMixin, ListView):
 
 class DatasetDetailView(JSONResponseMixin, DetailView):
     model = Dataset
-    template = 'dataset_detail.html'
+    template = "dataset_detail.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -209,11 +300,74 @@ class DatasetDetailView(JSONResponseMixin, DetailView):
         context = super().get_context_data(**kwargs)
         ds_id = self.kwargs["pk"]
         dataset = Dataset.objects.get(id=ds_id)
-        context["relationships"] = Relationship.objects.filter(from_dataset=dataset)
-
+        context["dataset_relationships"] = dataset.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Dataset),
+        )
+        context["ai_relationships"] = dataset.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Ai),
+        )
         title = f"Sankey Diagram for the {dataset.url} Dataset"
         snakey_diagram = SankeyDiagram([dataset], title)
         context["plot_div"] = snakey_diagram.plot_div()
+
+        return context
+
+
+class AiListView(JSONResponseMixin, ListView):
+    model = Ai
+    template_name = "ai_list.html"
+
+    def render_to_response(self, context):
+        # Look for a 'format=json' GET argument
+        if (
+            self.request.GET.get("format") == "json"
+            or self.request.content_type == "application/json"
+        ):
+            return self.render_to_json_response(context)
+
+        if len(context["ai_list"]) == 1:
+            id_ = context["ai_list"][0].id
+            return redirect("ai-detail", pk=id_)
+
+        return super().render_to_response(context)
+
+    def get_queryset(self):
+        ai_type = self.request.GET.get("type")
+        category = self.request.GET.get("category")
+        use = self.request.GET.get("use")
+
+        return get_ai_queryset(ai_type, category, use)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class AiDetailView(JSONResponseMixin, DetailView):
+    model = Ai
+    template = "ai_detail.html"
+
+    def render_to_response(self, context):
+        # Look for a 'format=json' GET argument
+        if (
+            self.request.GET.get("format") == "json"
+            or self.request.content_type == "application/json"
+        ):
+            return self.render_to_json_response(context)
+
+        # return html
+        return super().render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ai_id = self.kwargs["pk"]
+        ai = Ai.objects.get(id=ai_id)
+        context["dataset_relationships"] = ai.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Dataset),
+        )
+        context["project_relationships"] = ai.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Project),
+        )
 
         return context
 
@@ -245,14 +399,11 @@ class DatasetUrlDetailView(JSONResponseMixin, ListView):
             # return html detail page
             dataset = context["object_list"][0]
             context["object"] = dataset
-            context["relationships"] = Relationship.objects.filter(from_dataset=dataset)
             title = f"Sankey Diagram for the {dataset.url} Dataset"
             snakey_diagram = SankeyDiagram([dataset], title)
             context["plot_div"] = snakey_diagram.plot_div()
 
-            return TemplateResponse(
-                self.request, "dataset_detail.html", context
-            )
+            return TemplateResponse(self.request, "dataset_detail.html", context)
 
         return super().render_to_response(context)
 
@@ -261,7 +412,7 @@ class DatasetUrlDetailView(JSONResponseMixin, ListView):
         return Dataset.objects.filter(url=url)
 
 
-def get_queryset(url=None, filters=None, provider=None, ecv=None):
+def get_dataset_queryset(url=None, filters=None, provider=None, ecv=None):
     if url is not None and url != "":
         # get the datasets for the given url
         datasets = Dataset.objects.all().filter(url=url)
@@ -312,6 +463,25 @@ def get_queryset(url=None, filters=None, provider=None, ecv=None):
         datasets = datasets.exclude(id=exclude)
 
     return datasets
+
+
+def get_ai_queryset(ai_type=None, category=None, use=None):
+    if ai_type is not None and ai_type != "":
+        # get the datasets for the given url
+        ais = Ai.objects.all().filter(type_name=ai_type)
+    else:
+        # get all datasets
+        ais = Ai.objects.all().order_by("type")
+
+    if category is not None and category != "":
+        # get the datasets for the given provider
+        ais = ais.filter(type__category_name=category)
+
+    if use is not None and use != "":
+        # get the datasets for the given ecv
+        ais = ais.filter(use_name=use)
+
+    return ais
 
 
 class DocsApiView(TemplateView):
@@ -536,7 +706,9 @@ class SankeyDiagram:
             # loop round all of the dataset(s)
             # this could be all datasets for a URL, all CS3 datasets or all CCI datasets
 
-            for relationship in dataset.relationship_set.all():
+            for relationship in dataset.outgoing_relationships.filter(
+                target_content_type=ContentType.objects.get_for_model(Dataset)
+            ):
                 # now loop round all of the relationships for this dataset
                 source_index = self._get_index(
                     dataset.url, f"Dataset: {dataset}", SANKEY_COLOUR_1
@@ -545,7 +717,7 @@ class SankeyDiagram:
 
                 if len(dataset.filters.all()) == 0:
                     # No filters on the prime datasets
-                    related_ds = relationship.to_dataset
+                    related_ds = relationship.target
                     if len(related_ds.filters.all()) > 0:
                         filter_index = self._add_filters(
                             related_ds,
@@ -580,7 +752,7 @@ class SankeyDiagram:
                         relationship,
                     )
 
-                    related_ds = relationship.to_dataset
+                    related_ds = relationship.target
 
                     if len(related_ds.filters.all()) > 0:
                         filter_index = self._add_filters(

@@ -2,12 +2,16 @@ from django.core.management.base import BaseCommand
 from openpyxl import load_workbook
 
 from data_bridge_app.models import (
-    Dataset,
     ECV,
+    Ai,
+    AiCategory,
+    AiType,
+    AiUse,
+    Dataset,
     Filter,
     Project,
-    RelationType,
     Relationship,
+    RelationType,
 )
 
 ID_1 = 0
@@ -24,22 +28,42 @@ PROVIDER_2 = 10
 ECV_2 = 11
 DESCRIPTION = 12
 
+AI_PROJECT = 0
+AI_DATASET = 1
+AI_RELATIONSHIP_1 = 2
+AI_RELATIONSHIP_2 = 3
+AI_TYPE = 4
+AI_CATEGORY = 5
+AI_USE = 6
+AI_DESCRIPTION = 7
+
+
 def get_from_github(dir: str):
     import requests
 
-    print('Downloading from source')
-    link = 'https://github.com/cedadev/cci_data_bridge_inputs/raw/8d450b0cbd470a1555ee1d0dbbc68b0874c9f2f1/EEE2000-metadata_mapping.xlsx'
+    print("Downloading from source")
+    link = "https://github.com/cedadev/cci_data_bridge_inputs/raw/8d450b0cbd470a1555ee1d0dbbc68b0874c9f2f1/EEE2000-metadata_mapping.xlsx"
 
     resp = requests.get(link)
-    with open(f'{dir}/testfile.xlsx','wb') as f:
+    with open(f"{dir}/testfile.xlsx", "wb") as f:
         f.write(resp.content)
 
-    return f'{dir}/testfile.xlsx'
+    return f"{dir}/testfile.xlsx"
+
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument("--excel_wb", dest="excel_wb", type=str, help="The excel workbook to import", default=None,nargs="?")
-        parser.add_argument("--dir", dest="dir", type=str, help="Temp Directory", default="/tmp")
+        parser.add_argument(
+            "--excel_wb",
+            dest="excel_wb",
+            type=str,
+            help="The excel workbook to import",
+            default=None,
+            nargs="?",
+        )
+        parser.add_argument(
+            "--dir", dest="dir", type=str, help="Temp Directory", default="/tmp"
+        )
 
     def handle(self, dir: str, excel_wb: str | None, **kwargs):
         print("Import data from spreadsheet")
@@ -48,11 +72,15 @@ class Command(BaseCommand):
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
-        w_sheet = w_book.get_sheet_by_name("Mapping")
+        w_sheet = w_book["Mapping"]
         providers = _write_providers()
         ecvs = _write_ecvs(w_sheet)
         filters = _write_filters(w_sheet)
         _write_datasets(w_sheet, ecvs, filters, providers, related_types)
+
+        ai_w_sheet = w_book["AI Mapping"]
+        _write_ais(ai_w_sheet)
+
         print("Database updated")
 
 
@@ -63,6 +91,10 @@ def _clean():
     Project.objects.all().delete()
     RelationType.objects.all().delete()
     Relationship.objects.all().delete()
+    Ai.objects.all().delete()
+    AiType.objects.all().delete()
+    AiCategory.objects.all().delete()
+    AiUse.objects.all().delete()
 
 
 def _write_related_types(w_book):
@@ -91,12 +123,9 @@ def _write_providers():
     providers["CCI Archive on CEDA"] = Project.objects.create(
         name="CCI Archive on CEDA"
     )
-    providers["OSI SAF"] = Project.objects.create(
-        name="OSI SAF"
-    )
-    providers["CM SAF"] = Project.objects.create(
-        name="CM SAF"
-    )
+    providers["OSI SAF"] = Project.objects.create(name="OSI SAF")
+    providers["CM SAF"] = Project.objects.create(name="CM SAF")
+    providers["RECCAP-2"] = Project.objects.create(name="RECCAP-2")
     return providers
 
 
@@ -143,6 +172,49 @@ def _get_filters(w_sheet):
     return filters
 
 
+def _write_ai_categories(w_sheet):
+    for row in w_sheet.iter_rows(min_row=3, max_col=9, max_row=w_sheet.max_row):
+        ai_category = Ai.objects.create(row[FILTER_1].value)
+
+
+def _write_ais(w_sheet):
+    for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
+        ai_category, _ = AiCategory.objects.get_or_create(name=row[AI_CATEGORY].value)
+        ai_type, _ = AiType.objects.get_or_create(
+            name=row[AI_TYPE].value, category=ai_category
+        )
+        ai_use, _ = AiUse.objects.get_or_create(name=row[AI_USE].value)
+        ai, _ = Ai.objects.get_or_create(use=ai_use, type=ai_type)
+
+        provider, _ = Project.objects.get_or_create(name=row[AI_PROJECT].value)
+        if row[AI_DATASET].value.strip() != "-":
+            source, _ = Dataset.objects.get_or_create(
+                url=row[AI_DATASET].value, dataset_provider=provider
+            )
+        else:
+            source = provider
+
+        relationship_1 = Relationship.objects.create(
+            source=source,
+            target=ai,
+            description=row[AI_DESCRIPTION].value or "",
+        )
+
+        for rel_type in _get_values(row[AI_RELATIONSHIP_1].value):
+            relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
+            relationship_1.relationships.add(relationship_type)
+
+        relationship_2 = Relationship.objects.create(
+            source=ai,
+            target=source,
+            description=row[AI_DESCRIPTION].value or "",
+        )
+
+        for rel_type in _get_values(row[AI_RELATIONSHIP_2].value):
+            relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
+            relationship_2.relationships.add(relationship_type)
+
+
 def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
     for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
         if row[ID_1].value is None:
@@ -155,15 +227,21 @@ def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
         )
 
         # add start date
-        if row[START_DATE_1].value is not None:
+        if (
+            row[START_DATE_1].value is not None
+            and str(row[START_DATE_1].value).strip() != "-"
+        ):
             ds_1.start_date = str(row[START_DATE_1].value).split(" ")[0]
             ds_1.start_date = row[START_DATE_1].value
             ds_1.save()
 
         # add end date
-        if row[END_DATE_1].value is not None:
+        if (
+            row[END_DATE_1].value is not None
+            and str(row[START_DATE_1].value).strip() != "-"
+        ):
             ds_1.end_date = row[END_DATE_1].value
-            #print(x, ds_1.end_date)
+            # print(x, ds_1.end_date)
             ds_1.save()
 
         # add ECVs
@@ -216,9 +294,9 @@ def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
             if description is None:
                 description = ""
             rel = Relationship.objects.create(
-                from_dataset=ds_1,
+                source=ds_1,
                 # relationships=relationship_types,
-                to_dataset=ds_2,
+                target=ds_2,
                 description=description,
             )
             for relationship_type in relationship_types:
@@ -242,8 +320,8 @@ def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
             if description is None:
                 description = ""
             rel = Relationship.objects.create(
-                from_dataset=ds_2,
-                to_dataset=ds_1,
+                source=ds_2,
+                target=ds_1,
                 description=description,
             )
             for relationship_type in relationship_types:

@@ -13,8 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 
 from data_bridge_app import views
 
@@ -22,6 +23,8 @@ urlpatterns = [
     path("", views.HomeView.as_view()),
     path("admin/", admin.site.urls),
     path("dataset/", views.DatasetListView.as_view(), name="dataset-list"),
+    path("ai/", views.AiListView.as_view(), name="ai-list"),
+    path("ai/<int:pk>", views.AiDetailView.as_view(), name="ai-detail"),
     path("dataset/<int:pk>", views.DatasetDetailView.as_view(), name="dataset-detail"),
     path("dataset/<path:url>", views.DatasetUrlDetailView.as_view()),
     path("project/", views.ProjectListView.as_view(), name="project-list"),
