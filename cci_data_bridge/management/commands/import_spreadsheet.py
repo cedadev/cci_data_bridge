@@ -3,6 +3,7 @@ from openpyxl import load_workbook
 
 from django.conf import settings
 from django.core import management
+import os
 
 from data_bridge_app.models import (
     ECV,
@@ -73,7 +74,7 @@ class Command(BaseCommand):
 
     def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
 
-        if not settings.DATABASES['default']['NAME'].exists():
+        if not os.path.isfile(str(settings.DATABASES['default']['NAME'])):
             print('[info] Migrating database')
             management.call_command('migrate', interactive=False)
         else:
