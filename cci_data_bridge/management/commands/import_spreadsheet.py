@@ -75,10 +75,10 @@ class Command(BaseCommand):
     def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
 
         if not os.path.isfile(str(settings.DATABASES['default']['NAME'])):
-            print('[info] Migrating database')
+            print(f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}")
             management.call_command('migrate', interactive=False)
         else:
-            print('[info] Skipping migration for existing database')
+            print(f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}")
 
         print("[info] Import data from spreadsheet")
         if not excel_wb:
