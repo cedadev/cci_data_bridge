@@ -1,6 +1,9 @@
 from django.core.management.base import BaseCommand
 from openpyxl import load_workbook
 
+from django.conf import settings
+from django.core import management
+
 from data_bridge_app.models import (
     ECV,
     Ai,
@@ -69,7 +72,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
-        print("Import data from spreadsheet")
+
+        if not settings.DATABASES['default']['NAME'].exists():
+            print('[info] Migrating database')
+            management.call_command('migrate', interactive=False)
+        else:
+            print('[info] Skipping migration for existing database')
+
+        print("[info] Import data from spreadsheet")
         if not excel_wb:
             excel_wb = get_from_github(dir, branch)
         _clean()
