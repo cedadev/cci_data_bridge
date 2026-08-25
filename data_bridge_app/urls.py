@@ -30,7 +30,7 @@ urlpatterns = [
     path(
         "provider/",
         views.DatasetProviderListView.as_view(),
-        name="dataset-provider-list",
+        name="provider-list",
     ),
     path(
         "relationtype/", views.RelationTypeListView.as_view(), name="relation-type-list"
