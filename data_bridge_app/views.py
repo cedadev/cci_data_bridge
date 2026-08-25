@@ -26,7 +26,14 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from plotly.offline import plot
 
-from data_bridge_app.models import ECV, Ai, Dataset, Project, Relationship, RelationType
+from data_bridge_app.models import (
+    ECV,
+    Ai,
+    Dataset,
+    DatasetProvider,
+    Relationship,
+    RelationType,
+)
 
 SANKEY_COLOUR_1 = "rgba(230, 159, 0, 1.0)"
 SANKEY_COLOUR_2 = "rgba(86, 180, 233, 1.0)"
@@ -115,7 +122,9 @@ class JSONResponseMixin:
         data["relationships"].extend(
             self.get_project_relationship_json(
                 project_relationships=ai.outgoing_relationships.filter(
-                    target_content_type=ContentType.objects.get_for_model(Project),
+                    target_content_type=ContentType.objects.get_for_model(
+                        DatasetProvider
+                    ),
                 ),
             )
         )
@@ -366,7 +375,7 @@ class AiDetailView(JSONResponseMixin, DetailView):
             target_content_type=ContentType.objects.get_for_model(Dataset),
         )
         context["project_relationships"] = ai.outgoing_relationships.filter(
-            target_content_type=ContentType.objects.get_for_model(Project),
+            target_content_type=ContentType.objects.get_for_model(DatasetProvider),
         )
 
         return context
@@ -488,8 +497,8 @@ class DocsApiView(TemplateView):
     template_name = "api_doc.html"
 
 
-class ProjectListView(ListView):
-    model = Project
+class DatasetProviderListView(ListView):
+    model = DatasetProvider
     template_name = "project_list.html"
 
     def render_to_response(self, context):
@@ -529,7 +538,7 @@ class SankeyView(RedirectView):
     template_name = "sankey.html"
 
 
-class SankeyProjectView(ImageResponseMixin, TemplateView):
+class SankeyDatasetProviderView(ImageResponseMixin, TemplateView):
     template_name = "sankey.html"
 
     def render_to_response(self, context):
@@ -561,7 +570,9 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
         return super().render_to_response(context)
 
     def get_context_data(self, *args, **kwargs):
-        context = super(SankeyProjectView, self).get_context_data(*args, **kwargs)
+        context = super(SankeyDatasetProviderView, self).get_context_data(
+            *args, **kwargs
+        )
 
         project = self.kwargs["project"]
         if project.lower() == "cci":
@@ -584,7 +595,7 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
             datasets = Dataset.objects.filter(ecvs=project)
 
         if len(datasets.all()) == 0:
-            raise Http404(f"Project not found - Database empty")
+            raise Http404(f"Dataset Provider not found - Database empty")
 
         title = f"Sankey Diagram for {project} Datasets"
         snakey_diagram = SankeyDiagram(datasets, title)

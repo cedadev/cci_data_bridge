@@ -8,6 +8,7 @@ from data_bridge_app.models import (
     AiType,
     AiUse,
     Dataset,
+    DatasetProvider,
     Filter,
     Project,
     Relationship,
@@ -28,14 +29,15 @@ PROVIDER_2 = 10
 ECV_2 = 11
 DESCRIPTION = 12
 
-AI_PROJECT = 0
-AI_DATASET = 1
-AI_RELATIONSHIP_1 = 2
-AI_RELATIONSHIP_2 = 3
-AI_TYPE = 4
-AI_CATEGORY = 5
-AI_USE = 6
-AI_DESCRIPTION = 7
+AI_PROVIDER = 0
+AI_PROJECT = 1
+AI_DATASET = 2
+AI_RELATIONSHIP_1 = 3
+AI_RELATIONSHIP_2 = 4
+AI_TYPE = 5
+AI_CATEGORY = 6
+AI_USE = 7
+AI_DESCRIPTION = 8
 
 
 def get_from_github(dir: str):
@@ -88,7 +90,7 @@ def _clean():
     Dataset.objects.all().delete()
     ECV.objects.all().delete()
     Filter.objects.all().delete()
-    Project.objects.all().delete()
+    DatasetProvider.objects.all().delete()
     RelationType.objects.all().delete()
     Relationship.objects.all().delete()
     Ai.objects.all().delete()
@@ -114,18 +116,18 @@ def _write_related_types(w_book):
 
 def _write_providers():
     providers = {}
-    providers["C3S Climate Data Store"] = Project.objects.create(
+    providers["C3S Climate Data Store"] = DatasetProvider.objects.create(
         name="C3S Climate Data Store"
     )
-    providers["CCI Open Data Portal"] = Project.objects.create(
+    providers["CCI Open Data Portal"] = DatasetProvider.objects.create(
         name="CCI Open Data Portal"
     )
-    providers["CCI Archive on CEDA"] = Project.objects.create(
+    providers["CCI Archive on CEDA"] = DatasetProvider.objects.create(
         name="CCI Archive on CEDA"
     )
-    providers["OSI SAF"] = Project.objects.create(name="OSI SAF")
-    providers["CM SAF"] = Project.objects.create(name="CM SAF")
-    providers["RECCAP-2"] = Project.objects.create(name="RECCAP-2")
+    providers["OSI SAF"] = DatasetProvider.objects.create(name="OSI SAF")
+    providers["CM SAF"] = DatasetProvider.objects.create(name="CM SAF")
+    providers["RECCAP-2"] = DatasetProvider.objects.create(name="RECCAP-2")
     return providers
 
 
@@ -186,33 +188,53 @@ def _write_ais(w_sheet):
         ai_use, _ = AiUse.objects.get_or_create(name=row[AI_USE].value)
         ai, _ = Ai.objects.get_or_create(use=ai_use, type=ai_type)
 
-        provider, _ = Project.objects.get_or_create(name=row[AI_PROJECT].value)
+        provider, _ = DatasetProvider.objects.get_or_create(name=row[AI_PROVIDER].value)
+        relationship_d_1 = None
+        relationship_d_2 = None
         if row[AI_DATASET].value.strip() != "-":
-            source, _ = Dataset.objects.get_or_create(
+            dataset, _ = Dataset.objects.get_or_create(
                 url=row[AI_DATASET].value, dataset_provider=provider
             )
-        else:
-            source = provider
 
-        relationship_1 = Relationship.objects.create(
-            source=source,
+            relationship_d_1 = Relationship.objects.create(
+                source=dataset,
+                target=ai,
+                description=row[AI_DESCRIPTION].value or "",
+            )
+
+            relationship_d_2 = Relationship.objects.create(
+                source=ai,
+                target=dataset,
+                description=row[AI_DESCRIPTION].value or "",
+            )
+
+        project, _ = Dataset.objects.get_or_create(
+            url=row[AI_DATASET].value, dataset_provider=provider
+        )
+
+        relationship_p_1 = Relationship.objects.create(
+            source=project,
             target=ai,
+            description=row[AI_DESCRIPTION].value or "",
+        )
+
+        relationship_p_2 = Relationship.objects.create(
+            source=ai,
+            target=project,
             description=row[AI_DESCRIPTION].value or "",
         )
 
         for rel_type in _get_values(row[AI_RELATIONSHIP_1].value):
             relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_1.relationships.add(relationship_type)
-
-        relationship_2 = Relationship.objects.create(
-            source=ai,
-            target=source,
-            description=row[AI_DESCRIPTION].value or "",
-        )
+            relationship_p_1.relationships.add(relationship_type)
+            if relationship_d_1:
+                relationship_d_1.relationships.add(relationship_type)
 
         for rel_type in _get_values(row[AI_RELATIONSHIP_2].value):
             relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_2.relationships.add(relationship_type)
+            relationship_d_2.relationships.add(relationship_type)
+            if relationship_d_2:
+                relationship_p_2.relationships.add(relationship_type)
 
 
 def _write_datasets(w_sheet, ecvs, filters, providers, related_types):

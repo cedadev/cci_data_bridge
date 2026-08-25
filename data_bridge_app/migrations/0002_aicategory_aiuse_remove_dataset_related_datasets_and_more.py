@@ -184,4 +184,13 @@ class Migration(migrations.Migration):
             model_name="relationship",
             name="from_dataset",
         ),
+        migrations.RenameModel(
+            old_name="Project",
+            new_name="DatasetProvider",
+        ),
+        migrations.AlterField(
+            model_name="relationship",
+            name="target_object_pk",
+            field=models.CharField(),
+        ),
     ]

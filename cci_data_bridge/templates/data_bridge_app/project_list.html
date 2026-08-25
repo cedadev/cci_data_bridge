@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% block project-link %}
-<a class="nav-link active" href="{% url 'project-list'  %}">Projects</a>
+<a class="nav-link active" href="{% url 'project-list'  %}">DatasetProviders</a>
 {% endblock %}
 {% block json-link %}
 <a class="nav-link active" href="{% url 'project-list' %}?format=json">View as JSON</a>
 {% endblock %}
 
 {% block content %}
-<h1 class="mt-2 mb-4">Projects</h1>
+<h1 class="mt-2 mb-4">Dataset Providers</h1>
 
 <table id="result_list"
     class="table table-hover table-striped table-bordered">
     <thead>
         <tr>
-            <th scope="col">Project</th>
+            <th scope="col">Dataset Provider</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">

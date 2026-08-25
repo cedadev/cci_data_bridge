@@ -164,10 +164,26 @@ class Ai(models.Model):
     )
 
 
+class DatasetProvider(models.Model):
+    name = models.CharField(
+        max_length=50,
+        primary_key=True,
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class Project(models.Model):
     name = models.CharField(
         max_length=50,
         primary_key=True,
+    )
+
+    dataset_provider = models.ForeignKey(
+        DatasetProvider,
+        on_delete=models.CASCADE,
+        blank=False,
     )
 
     outgoing_relationships = GenericRelation(
@@ -208,7 +224,7 @@ class Dataset(models.Model):
     )
 
     dataset_provider = models.ForeignKey(
-        Project,
+        DatasetProvider,
         on_delete=models.CASCADE,
         blank=False,
     )
