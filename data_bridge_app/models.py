@@ -177,7 +177,6 @@ class DatasetProvider(models.Model):
 class Project(models.Model):
     name = models.CharField(
         max_length=50,
-        primary_key=True,
     )
 
     dataset_provider = models.ForeignKey(
@@ -268,8 +267,6 @@ class Dataset(models.Model):
 
     @property
     def related_relationships(self):
-        dataset_ct = ContentType.objects.get_for_model(Ai)
-
         return Relationship.objects.filter(source_object_pk=self.id)
 
     @property

@@ -196,11 +196,6 @@ def _get_filters(w_sheet):
     return filters
 
 
-def _write_ai_categories(w_sheet):
-    for row in w_sheet.iter_rows(min_row=3, max_col=9, max_row=w_sheet.max_row):
-        ai_category = Ai.objects.create(row[FILTER_1].value)
-
-
 def _write_ais(w_sheet):
     for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
         ai_category, _ = AiCategory.objects.get_or_create(name=row[AI_CATEGORY].value)
@@ -231,7 +226,7 @@ def _write_ais(w_sheet):
             )
 
         project, _ = Project.objects.get_or_create(
-            name=row[AI_PROVIDER].value,
+            name=row[AI_PROJECT].value,
             dataset_provider=provider,
         )
 

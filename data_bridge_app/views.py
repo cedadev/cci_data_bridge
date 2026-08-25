@@ -31,6 +31,7 @@ from data_bridge_app.models import (
     Ai,
     Dataset,
     DatasetProvider,
+    Project,
     Relationship,
     RelationType,
 )
@@ -375,7 +376,7 @@ class AiDetailView(JSONResponseMixin, DetailView):
             target_content_type=ContentType.objects.get_for_model(Dataset),
         )
         context["project_relationships"] = ai.outgoing_relationships.filter(
-            target_content_type=ContentType.objects.get_for_model(DatasetProvider),
+            target_content_type=ContentType.objects.get_for_model(Project),
         )
 
         return context
@@ -547,21 +548,21 @@ class SankeyDatasetProviderView(ImageResponseMixin, TemplateView):
             self.request.GET.get("format") == "png"
             or self.request.content_type == "image/png"
         ):
-            filename = f"{context.get('project')}-sankey"
+            filename = f"{context.get('provider')}-sankey"
             return self.render_to_image_response(context, filename, "png")
         # Look for a 'format=svg' GET argument
         if (
             self.request.GET.get("format") == "svg"
             or self.request.content_type == "image/svg+xml"
         ):
-            filename = f"{context.get('project')}-sankey"
+            filename = f"{context.get('provider')}-sankey"
             return self.render_to_image_response(context, filename, "svg")
         # Look for a 'format=jpeg' GET argument
         if (
             self.request.GET.get("format") == "jpeg"
             or self.request.content_type == "image/jpeg"
         ):
-            filename = f"{context.get('project')}-sankey"
+            filename = f"{context.get('provider')}-sankey"
             return self.render_to_image_response(context, filename, "jpeg")
 
         # return html
@@ -574,7 +575,7 @@ class SankeyDatasetProviderView(ImageResponseMixin, TemplateView):
             *args, **kwargs
         )
 
-        project = self.kwargs["project"]
+        project = self.kwargs["provider"]
         if project.lower() == "cci":
             datasets = Dataset.objects.filter(
                 Q(dataset_provider="CCI Open Data Portal")

@@ -17,7 +17,7 @@
         </tr>
     </thead>
     <tbody class="table-group-divider">
-        {% for dataset_provider in dataset_provider_list %}
+        {% for dataset_provider in datasetprovider_list %}
         <tr>
             <td><a href="{% url 'dataset-list' %}?provider={{dataset_provider.name }}">{{ dataset_provider.name }}</a></td>
         </tr>

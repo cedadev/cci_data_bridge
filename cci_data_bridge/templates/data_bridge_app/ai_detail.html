@@ -22,6 +22,7 @@
         <tr>
             <th scope="col">Relationship</th>
             <th scope="col">Related Dataset</th>
+            <th scope="col">Dataset Provider</th>
             <th scope="col">Filters</th>
             <th scope="col">Description</th>
             <th scope="col">Start Date</th>
@@ -55,7 +56,7 @@
             data-bs-placement="top"
             data-bs-title="Go to the catalogue entry for this dataset. Opens a new window.">
                 {{ relationship.target.url }}</a></td>
-
+        <td>{{ relationship.target.dataset_provider }}</td>
         <td><ul>
         {% for filter in relationship.target.filters.all %}
         {{ filter.name }} = {{ filter.value }}<br/>
