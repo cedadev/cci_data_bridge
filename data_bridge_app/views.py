@@ -499,7 +499,7 @@ class DocsApiView(TemplateView):
 
 class DatasetProviderListView(ListView):
     model = DatasetProvider
-    template_name = "project_list.html"
+    template_name = "provider_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument

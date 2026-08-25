@@ -27,13 +27,17 @@ urlpatterns = [
     path("ai/<int:pk>", views.AiDetailView.as_view(), name="ai-detail"),
     path("dataset/<int:pk>", views.DatasetDetailView.as_view(), name="dataset-detail"),
     path("dataset/<path:url>", views.DatasetUrlDetailView.as_view()),
-    path("project/", views.DatasetProviderListView.as_view(), name="project-list"),
+    path(
+        "provider/",
+        views.DatasetProviderListView.as_view(),
+        name="dataset-provider-list",
+    ),
     path(
         "relationtype/", views.RelationTypeListView.as_view(), name="relation-type-list"
     ),
     path("sankey/", views.SankeyView.as_view(), name="sankey"),
     path(
-        "sankey/<slug:project>",
+        "sankey/<slug:provider>",
         views.SankeyDatasetProviderView.as_view(),
         name="sankey",
     ),
