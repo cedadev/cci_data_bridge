@@ -168,6 +168,14 @@ class JSONResponseMixin:
             )
         )
 
+        data["relationships"].extend(
+            self.get_project_relationship_json(
+                project_relationships=dataset.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(Project),
+                ),
+            )
+        )
+
         return data
 
     def get_dataset_relationship_json(self, dataset_relationships):
@@ -185,6 +193,7 @@ class JSONResponseMixin:
                 relationship = {
                     "relationship_types": [str(rel)],
                     "related_dataset": str(rel.target),
+                    "related_activity_type": "dataset",
                 }
 
                 if rel.target.start_date is not None:
@@ -227,6 +236,7 @@ class JSONResponseMixin:
                         "category": rel.target.type.category.name,
                     },
                     "related_ai_use": rel.target.use.name,
+                    "related_activity_type": "AI",
                 }
 
                 combiened_relationships[rel.target.id] = relationship
@@ -248,6 +258,7 @@ class JSONResponseMixin:
                 relationship = {
                     "relationship_types": [str(rel)],
                     "related_project": rel.target.name,
+                    "related_activity_type": "project",
                 }
 
                 combiened_relationships[rel.target.pk] = relationship
