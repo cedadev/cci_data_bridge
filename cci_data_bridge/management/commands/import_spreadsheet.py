@@ -1,6 +1,10 @@
 from django.core.management.base import BaseCommand
 from openpyxl import load_workbook
 
+from django.conf import settings
+from django.core import management
+import os
+
 from data_bridge_app.models import (
     ECV,
     Ai,
@@ -40,11 +44,11 @@ AI_USE = 7
 AI_DESCRIPTION = 8
 
 
-def get_from_github(dir: str):
+def get_from_github(dir: str, branch: str = 'main'):
     import requests
 
-    print("Downloading from source")
-    link = "https://github.com/cedadev/cci_data_bridge_inputs/raw/8d450b0cbd470a1555ee1d0dbbc68b0874c9f2f1/EEE2000-metadata_mapping.xlsx"
+    print(f"Downloading from Github: {branch}")
+    link = f"https://github.com/cedadev/cci_data_bridge_inputs/raw/refs/heads/{branch}/EEE2000-metadata_mapping.xlsx"
 
     resp = requests.get(link)
     with open(f"{dir}/testfile.xlsx", "wb") as f:
@@ -66,11 +70,21 @@ class Command(BaseCommand):
         parser.add_argument(
             "--dir", dest="dir", type=str, help="Temp Directory", default="/tmp"
         )
+        parser.add_argument(
+            '--branch', dest='branch', type=str, help='Data Inputs branch', default='main'
+        )
 
-    def handle(self, dir: str, excel_wb: str | None, **kwargs):
-        print("Import data from spreadsheet")
+    def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
+
+        if not os.path.isfile(str(settings.DATABASES['default']['NAME'])):
+            print(f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}")
+            management.call_command('migrate', interactive=False)
+        else:
+            print(f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}")
+
+        print("[info] Import data from spreadsheet")
         if not excel_wb:
-            excel_wb = get_from_github(dir)
+            excel_wb = get_from_github(dir, branch)
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
