@@ -1,9 +1,9 @@
-from django.core.management.base import BaseCommand
-from openpyxl import load_workbook
+import os
 
 from django.conf import settings
 from django.core import management
-import os
+from django.core.management.base import BaseCommand
+from openpyxl import load_workbook
 
 from data_bridge_app.models import (
     ECV,
@@ -44,7 +44,7 @@ AI_USE = 7
 AI_DESCRIPTION = 8
 
 
-def get_from_github(dir: str, branch: str = 'main'):
+def get_from_github(dir: str, branch: str = "main"):
     import requests
 
     print(f"Downloading from Github: {branch}")
@@ -71,16 +71,24 @@ class Command(BaseCommand):
             "--dir", dest="dir", type=str, help="Temp Directory", default="/tmp"
         )
         parser.add_argument(
-            '--branch', dest='branch', type=str, help='Data Inputs branch', default='main'
+            "--branch",
+            dest="branch",
+            type=str,
+            help="Data Inputs branch",
+            default="main",
         )
 
     def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
 
-        if not os.path.isfile(str(settings.DATABASES['default']['NAME'])):
-            print(f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}")
-            management.call_command('migrate', interactive=False)
+        if not os.path.isfile(str(settings.DATABASES["default"]["NAME"])):
+            print(
+                f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}"
+            )
+            management.call_command("migrate", interactive=False)
         else:
-            print(f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}")
+            print(
+                f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}"
+            )
 
         print("[info] Import data from spreadsheet")
         if not excel_wb:
@@ -246,9 +254,9 @@ def _write_ais(w_sheet):
 
         for rel_type in _get_values(row[AI_RELATIONSHIP_2].value):
             relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_d_2.relationships.add(relationship_type)
+            relationship_p_2.relationships.add(relationship_type)
             if relationship_d_2:
-                relationship_p_2.relationships.add(relationship_type)
+                relationship_d_2.relationships.add(relationship_type)
 
 
 def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
