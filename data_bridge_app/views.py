@@ -236,7 +236,8 @@ class JSONResponseMixin:
                         "category": rel.target.type.category.name,
                     },
                     "related_ai_use": rel.target.use.name,
-                    "related_activity_type": "AI",
+                    "related_ai_description": rel.target.use.name,
+                    "description": rel.description,
                 }
 
                 combiened_relationships[rel.target.id] = relationship
