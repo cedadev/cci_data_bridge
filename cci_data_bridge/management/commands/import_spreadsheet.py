@@ -230,8 +230,9 @@ def _write_ais(w_sheet):
                 description=row[AI_DESCRIPTION].value or "",
             )
 
-        project, _ = Dataset.objects.get_or_create(
-            url=row[AI_DATASET].value, dataset_provider=provider
+        project, _ = Project.objects.get_or_create(
+            name=row[AI_PROVIDER].value,
+            dataset_provider=provider,
         )
 
         relationship_p_1 = Relationship.objects.create(
