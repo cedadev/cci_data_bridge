@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block ai-link %}<a class="nav-link active" href="{% url 'ai-list'  %}">AIs</a>{% endblock %}
+{% block technique-link %}<a class="nav-link active" href="{% url 'technique-list'  %}">Techniques</a>{% endblock %}
 
 {% block json-link %}
 {% if '?' in request.get_full_path %}
@@ -12,27 +12,29 @@
 
 {% block content %}
 
-<h1 class="mt-2 mb-4">AIs</h1>
+<h1 class="mt-2 mb-4">Techniques</h1>
 
 <table id="result_list"
     class="table table-hover table-striped table-bordered">
     <thead>
         <tr>
             <th scope="col">Type</th>
+            <th scope="col">Subtype</th>
             <th scope="col">Category</th>
             <th scope="col">Use</th>
             <th scope="col"></th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
-        {% for ai in ai_list %}
+        {% for technique in technique_list %}
         <tr>
-            <td>{{ ai.type.name }}</td>
-            <td>{{ ai.type.category.name }}</td>
-            <td>{{ ai.use.name }}</td>
+            <td>{{ technique.type.name }}</td>
+            <td>{{ technique.subtype.name }}</td>
+            <td>{{ technique.category.name }}</td>
+            <td>{{ technique.use.name }}</td>
 
             <td><a class="btn btn-primary"
-                href={%url 'ai-detail' ai.pk %} role="button">More
+                href={%url 'technique-detail' technique.pk %} role="button">More
                     Details</a></td>
 
         </tr>

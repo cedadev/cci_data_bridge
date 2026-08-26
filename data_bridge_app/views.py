@@ -28,7 +28,7 @@ from plotly.offline import plot
 
 from data_bridge_app.models import (
     ECV,
-    Ai,
+    Technique,
     Dataset,
     DatasetProvider,
     Project,
@@ -102,27 +102,29 @@ class JSONResponseMixin:
         )
 
     def get_j_data(self, context):
-        if isinstance(context["object"], Ai):
-            return self.get_ai_json(context["object"])
+        if isinstance(context["object"], Technique):
+            return self.get_technique_json(context["object"])
 
         return self.get_dataset_json(context["object"])
 
-    def get_ai_json(self, ai):
+    def get_technique_json(self, technique):
         """
         Returns an object that will be serialized as JSON by json.dumps().
 
         """
         data = {}
-        data["type"] = {"name": ai.type.name, "category": ai.type.category.name}
-        data["use"] = ai.use.name
+        data["type"] = technique.type.name
+        data["subtype"] = technique.subtype.name
+        data["category"] = technique.category.name
+        data["use"] = technique.use.name
         data["relationships"] = self.get_dataset_relationship_json(
-            dataset_relationships=ai.outgoing_relationships.filter(
+            dataset_relationships=technique.outgoing_relationships.filter(
                 target_content_type=ContentType.objects.get_for_model(Dataset),
             )
         )
         data["relationships"].extend(
             self.get_project_relationship_json(
-                project_relationships=ai.outgoing_relationships.filter(
+                project_relationships=technique.outgoing_relationships.filter(
                     target_content_type=ContentType.objects.get_for_model(
                         DatasetProvider
                     ),
@@ -161,9 +163,9 @@ class JSONResponseMixin:
         )
 
         data["relationships"].extend(
-            self.get_ai_relationship_json(
-                ai_relationships=dataset.outgoing_relationships.filter(
-                    target_content_type=ContentType.objects.get_for_model(Ai),
+            self.get_technique_relationship_json(
+                technique_relationships=dataset.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(Technique),
                 ),
             )
         )
@@ -216,11 +218,11 @@ class JSONResponseMixin:
 
         return list(combiened_relationships.values())
 
-    def get_ai_relationship_json(self, ai_relationships):
+    def get_technique_relationship_json(self, technique_relationships):
 
         combiened_relationships = {}
 
-        for rel in ai_relationships:
+        for rel in technique_relationships:
             # do we have an entry for this ai id?
             if rel.target.id in combiened_relationships.keys():
                 # add to existing data
@@ -231,14 +233,12 @@ class JSONResponseMixin:
                 # generate new relationship
                 relationship = {
                     "relationship_types": [str(rel)],
-                    "related_ai_type": {
-                        "name": rel.target.type.name,
-                        "category": rel.target.type.category.name,
-                    },
-                    "related_ai_use": rel.target.use.name,
-                    "related_ai_description": rel.target.use.name,
-                    "related_activity_type": "AI",
+                    "related_technique_use": rel.target.use.name,
+                    "related_technique_category": rel.target.category.name,
+                    "related_technique_type": rel.target.type.name,
+                    "related_technique_subtype": rel.target.subtype.name,
                     "description": rel.description,
+                    "related_activity_type": "technique",
                 }
 
                 combiened_relationships[rel.target.id] = relationship
@@ -326,8 +326,8 @@ class DatasetDetailView(JSONResponseMixin, DetailView):
         context["dataset_relationships"] = dataset.outgoing_relationships.filter(
             target_content_type=ContentType.objects.get_for_model(Dataset),
         )
-        context["ai_relationships"] = dataset.outgoing_relationships.filter(
-            target_content_type=ContentType.objects.get_for_model(Ai),
+        context["technique_relationships"] = dataset.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Technique),
         )
         title = f"Sankey Diagram for the {dataset.url} Dataset"
         snakey_diagram = SankeyDiagram([dataset], title)
@@ -336,9 +336,9 @@ class DatasetDetailView(JSONResponseMixin, DetailView):
         return context
 
 
-class AiListView(JSONResponseMixin, ListView):
-    model = Ai
-    template_name = "ai_list.html"
+class TechniqueListView(JSONResponseMixin, ListView):
+    model = Technique
+    template_name = "technique_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -348,27 +348,28 @@ class AiListView(JSONResponseMixin, ListView):
         ):
             return self.render_to_json_response(context)
 
-        if len(context["ai_list"]) == 1:
-            id_ = context["ai_list"][0].id
-            return redirect("ai-detail", pk=id_)
+        if len(context["technique_list"]) == 1:
+            id_ = context["technique_list"][0].id
+            return redirect("technique-detail", pk=id_)
 
         return super().render_to_response(context)
 
     def get_queryset(self):
-        ai_type = self.request.GET.get("type")
+        technique_type = self.request.GET.get("type")
+        technique_subtype = self.request.GET.get("subtype")
         category = self.request.GET.get("category")
         use = self.request.GET.get("use")
 
-        return get_ai_queryset(ai_type, category, use)
+        return get_technique_queryset(technique_type, technique_subtype, category, use)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
 
-class AiDetailView(JSONResponseMixin, DetailView):
-    model = Ai
-    template = "ai_detail.html"
+class TechniqueDetailView(JSONResponseMixin, DetailView):
+    model = Technique
+    template = "technique_detail.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -383,12 +384,12 @@ class AiDetailView(JSONResponseMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ai_id = self.kwargs["pk"]
-        ai = Ai.objects.get(id=ai_id)
-        context["dataset_relationships"] = ai.outgoing_relationships.filter(
+        technique_id = self.kwargs["pk"]
+        technique = Technique.objects.get(id=technique_id)
+        context["dataset_relationships"] = technique.outgoing_relationships.filter(
             target_content_type=ContentType.objects.get_for_model(Dataset),
         )
-        context["project_relationships"] = ai.outgoing_relationships.filter(
+        context["project_relationships"] = technique.outgoing_relationships.filter(
             target_content_type=ContentType.objects.get_for_model(Project),
         )
 
@@ -488,23 +489,27 @@ def get_dataset_queryset(url=None, filters=None, provider=None, ecv=None):
     return datasets
 
 
-def get_ai_queryset(ai_type=None, category=None, use=None):
-    if ai_type is not None and ai_type != "":
+def get_technique_queryset(technique_type=None, subtype=None, category=None, use=None):
+    if technique_type is not None and technique_type != "":
         # get the datasets for the given url
-        ais = Ai.objects.all().filter(type_name=ai_type)
+        techniques = Technique.objects.all().filter(type_name=technique_type)
     else:
         # get all datasets
-        ais = Ai.objects.all().order_by("type")
+        techniques = Technique.objects.all().order_by("type")
+
+    if subtype is not None and subtype != "":
+        # get the datasets for the given provider
+        techniques = techniques.filter(subtype_name=subtype)
 
     if category is not None and category != "":
         # get the datasets for the given provider
-        ais = ais.filter(type__category_name=category)
+        techniques = techniques.filter(category_name=category)
 
     if use is not None and use != "":
         # get the datasets for the given ecv
-        ais = ais.filter(use_name=use)
+        techniques = techniques.filter(use_name=use)
 
-    return ais
+    return techniques
 
 
 class DocsApiView(TemplateView):

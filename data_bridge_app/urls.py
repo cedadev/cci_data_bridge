@@ -23,8 +23,8 @@ urlpatterns = [
     path("", views.HomeView.as_view()),
     path("admin/", admin.site.urls),
     path("dataset/", views.DatasetListView.as_view(), name="dataset-list"),
-    path("ai/", views.AiListView.as_view(), name="ai-list"),
-    path("ai/<int:pk>", views.AiDetailView.as_view(), name="ai-detail"),
+    path("technique/", views.TechniqueListView.as_view(), name="technique-list"),
+    path("technique/<int:pk>", views.TechniqueDetailView.as_view(), name="technique-detail"),
     path("dataset/<int:pk>", views.DatasetDetailView.as_view(), name="dataset-detail"),
     path("dataset/<path:url>", views.DatasetUrlDetailView.as_view()),
     path(

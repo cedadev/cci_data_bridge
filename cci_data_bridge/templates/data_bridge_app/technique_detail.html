@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block ai-link %}<a class="nav-link active" href="{% url 'ai-list'  %}">AIs</a>{% endblock %}
+{% block technique-link %}<a class="nav-link active" href="{% url 'technique-list'  %}">Techniques</a>{% endblock %}
 
 {% block json-link %}
-<a class="nav-link active" href="{% url 'ai-detail' ai.id %}?format=json">View as JSON</a>
+<a class="nav-link active" href="{% url 'technique-detail' technique.id %}?format=json">View as JSON</a>
 {% endblock %}
 
 {% block content %}
 
-<h1 class="mt-2 mb-5">AI</h1>
+<h1 class="mt-2 mb-5">Technique</h1>
 
-<h2>AI Type: <small>{{ ai.type.name }}</small></h2>
-<h2>AI Category: <small>{{ ai.type.category.name }}</small></h2>
-<h2>AI Use: <small>{{ ai.use.name }}</small></h2>
+<h2>Technique Type: <small>{{ ai.type.name }}</small></h2>
+<h2>Technique Category: <small>{{ ai.type.category.name }}</small></h2>
+<h2>Technique Use: <small>{{ ai.use.name }}</small></h2>
 
 <h2 class="mt-5">Related Datasets</h2>
 

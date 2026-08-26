@@ -98,58 +98,48 @@ class Filter(models.Model):
         return f"{self.name}={self.value}"
 
 
-class AiCategory(models.Model):
+class TechniqueCategory(models.Model):
     name = models.CharField(
-        "Parameter name",
+        "Technique category name",
         max_length=50,
-        help_text="Name of the parameter.",
+        help_text="Name of the technique category.",
+        primary_key=True,
+    )
+
+class TechniqueType(models.Model):
+
+    name = models.CharField(
+        "Technique type name",
+        max_length=50,
+        help_text="Name of the technique type.",
+        primary_key=True,
+    )
+
+class TechniqueSubtype(models.Model):
+    name = models.CharField(
+        "Technique subtype name",
+        max_length=50,
+        help_text="Name of the technique subtype.",
         primary_key=True,
     )
 
 
-class AiType(models.Model):
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["name", "category"],
-                name="unique_ai_type",
-            )
-        ]
-
+class TechniqueUse(models.Model):
     name = models.CharField(
-        "Parameter name",
+        "Technique use name",
         max_length=50,
-        help_text="Name of the parameter.",
-    )
-
-    category = models.ForeignKey(
-        AiCategory,
-        on_delete=models.CASCADE,
-        blank=False,
-    )
-
-
-class AiUse(models.Model):
-    name = models.CharField(
-        "Parameter name",
-        max_length=50,
-        help_text="Name of the parameter.",
+        help_text="Name of the technique use.",
         primary_key=True,
     )
 
 
-class Ai(models.Model):
+class Technique(models.Model):
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["type", "use"],
-                name="unique_ai",
-            )
-        ]
+    category = models.ForeignKey(TechniqueCategory, on_delete=models.CASCADE)
+    type = models.ForeignKey(TechniqueType, on_delete=models.CASCADE)
+    subtype = models.ForeignKey(TechniqueSubtype, on_delete=models.CASCADE)
 
-    type = models.ForeignKey(AiType, on_delete=models.CASCADE)
-    use = models.ForeignKey(AiUse, on_delete=models.CASCADE)
+    use = models.ForeignKey(TechniqueUse, on_delete=models.CASCADE)
 
     outgoing_relationships = GenericRelation(
         Relationship,
@@ -198,12 +188,12 @@ class Project(models.Model):
     )
 
     @property
-    def related_ais(self):
-        ai_ct = ContentType.objects.get_for_model(Ai)
+    def related_Techniques(self):
+        Technique_ct = ContentType.objects.get_for_model(Technique)
 
-        return Ai.objects.filter(
+        return Technique.objects.filter(
             pk__in=self.outgoing_relationships.filter(
-                target_content_type=ai_ct
+                target_content_type=Technique_ct
             ).values_list(
                 "target_object_pk",
                 flat=True,
@@ -283,12 +273,12 @@ class Dataset(models.Model):
         )
 
     @property
-    def related_ais(self):
-        ai_ct = ContentType.objects.get_for_model(Ai)
+    def related_Techniques(self):
+        Technique_ct = ContentType.objects.get_for_model(Technique)
 
-        return Ai.objects.filter(
+        return Technique.objects.filter(
             pk__in=self.outgoing_relationships.filter(
-                target_content_type=ai_ct
+                target_content_type=Technique_ct
             ).values_list(
                 "target_object_pk",
                 flat=True,

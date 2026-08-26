@@ -7,10 +7,11 @@ from openpyxl import load_workbook
 
 from data_bridge_app.models import (
     ECV,
-    Ai,
-    AiCategory,
-    AiType,
-    AiUse,
+    Technique,
+    TechniqueCategory,
+    TechniqueSubtype,
+    TechniqueType,
+    TechniqueUse,
     Dataset,
     DatasetProvider,
     Filter,
@@ -33,15 +34,16 @@ PROVIDER_2 = 10
 ECV_2 = 11
 DESCRIPTION = 12
 
-AI_PROVIDER = 0
-AI_PROJECT = 1
-AI_DATASET = 2
-AI_RELATIONSHIP_1 = 3
-AI_RELATIONSHIP_2 = 4
-AI_TYPE = 5
-AI_CATEGORY = 6
-AI_USE = 7
-AI_DESCRIPTION = 8
+TECHNIQUE_PROVIDER = 0
+TECHNIQUE_PROJECT = 1
+TECHNIQUE_DATASET = 2
+TECHNIQUE_RELATIONSHIP_1 = 3
+TECHNIQUE_RELATIONSHIP_2 = 4
+TECHNIQUE_TYPE = 5
+TECHNIQUE_SUBTYPE = 6
+TECHNIQUE_CATEGORY = 7
+TECHNIQUE_USE = 8
+TECHNIQUE_DESCRIPTION = 9
 
 
 def get_from_github(dir: str, branch: str = "main"):
@@ -102,8 +104,8 @@ class Command(BaseCommand):
         filters = _write_filters(w_sheet)
         _write_datasets(w_sheet, ecvs, filters, providers, related_types)
 
-        ai_w_sheet = w_book["AI Mapping"]
-        _write_ais(ai_w_sheet)
+        technique_w_sheet = w_book["Technique Mapping"]
+        _write_techniques(technique_w_sheet)
 
         print("Database updated")
 
@@ -115,10 +117,11 @@ def _clean():
     DatasetProvider.objects.all().delete()
     RelationType.objects.all().delete()
     Relationship.objects.all().delete()
-    Ai.objects.all().delete()
-    AiType.objects.all().delete()
-    AiCategory.objects.all().delete()
-    AiUse.objects.all().delete()
+    Technique.objects.all().delete()
+    TechniqueType.objects.all().delete()
+    TechniqueSubtype.objects.all().delete()
+    TechniqueCategory.objects.all().delete()
+    TechniqueUse.objects.all().delete()
 
 
 def _write_related_types(w_book):
@@ -196,59 +199,65 @@ def _get_filters(w_sheet):
     return filters
 
 
-def _write_ais(w_sheet):
+def _write_techniques(w_sheet):
     for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
-        ai_category, _ = AiCategory.objects.get_or_create(name=row[AI_CATEGORY].value)
-        ai_type, _ = AiType.objects.get_or_create(
-            name=row[AI_TYPE].value, category=ai_category
-        )
-        ai_use, _ = AiUse.objects.get_or_create(name=row[AI_USE].value)
-        ai, _ = Ai.objects.get_or_create(use=ai_use, type=ai_type)
+        technique_category, _ = TechniqueCategory.objects.get_or_create(name=row[TECHNIQUE_CATEGORY].value)
+        technique_type, _ = TechniqueType.objects.get_or_create(name=row[TECHNIQUE_TYPE].value)
+        technique_subtype, _ = TechniqueSubtype.objects.get_or_create(name=row[TECHNIQUE_SUBTYPE].value)
 
-        provider, _ = DatasetProvider.objects.get_or_create(name=row[AI_PROVIDER].value)
+        technique_use, _ = TechniqueUse.objects.get_or_create(name=row[TECHNIQUE_USE].value)
+
+        technique, _ = Technique.objects.get_or_create(
+            category=technique_category,
+            type=technique_type,
+            subtype=technique_subtype,
+            use=technique_use,
+        )
+
+        provider, _ = DatasetProvider.objects.get_or_create(name=row[TECHNIQUE_PROVIDER].value)
         relationship_d_1 = None
         relationship_d_2 = None
-        if row[AI_DATASET].value.strip() != "-":
+        if row[TECHNIQUE_DATASET].value.strip() != "-":
             dataset, _ = Dataset.objects.get_or_create(
-                url=row[AI_DATASET].value, dataset_provider=provider
+                url=row[TECHNIQUE_DATASET].value, dataset_provider=provider
             )
 
             relationship_d_1 = Relationship.objects.create(
                 source=dataset,
-                target=ai,
-                description=row[AI_DESCRIPTION].value or "",
+                target=technique,
+                description=row[TECHNIQUE_DESCRIPTION].value or "",
             )
 
             relationship_d_2 = Relationship.objects.create(
-                source=ai,
+                source=technique,
                 target=dataset,
-                description=row[AI_DESCRIPTION].value or "",
+                description=row[TECHNIQUE_DESCRIPTION].value or "",
             )
 
         project, _ = Project.objects.get_or_create(
-            name=row[AI_PROJECT].value,
+            name=row[TECHNIQUE_PROJECT].value,
             dataset_provider=provider,
         )
 
         relationship_p_1 = Relationship.objects.create(
             source=project,
-            target=ai,
-            description=row[AI_DESCRIPTION].value or "",
+            target=technique,
+            description=row[TECHNIQUE_DESCRIPTION].value or "",
         )
 
         relationship_p_2 = Relationship.objects.create(
-            source=ai,
+            source=technique,
             target=project,
-            description=row[AI_DESCRIPTION].value or "",
+            description=row[TECHNIQUE_DESCRIPTION].value or "",
         )
 
-        for rel_type in _get_values(row[AI_RELATIONSHIP_1].value):
+        for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_1].value):
             relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
             relationship_p_1.relationships.add(relationship_type)
             if relationship_d_1:
                 relationship_d_1.relationships.add(relationship_type)
 
-        for rel_type in _get_values(row[AI_RELATIONSHIP_2].value):
+        for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_2].value):
             relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
             relationship_p_2.relationships.add(relationship_type)
             if relationship_d_2:

@@ -94,8 +94,8 @@
     </tbody>
 </table>
 
-{% if ai_relationships %}
-<h2 class="mt-5">Related AI</h2>
+{% if technique_relationships %}
+<h2 class="mt-5">Related Technique</h2>
 
 <table id="related_datasets"
     class="table table-hover table-striped">
@@ -103,6 +103,7 @@
         <tr>
             <th scope="col">Relationship</th>
             <th scope="col">Type</th>
+            <th scope="col">Subtype</th>
             <th scope="col">Category</th>
             <th scope="col">Use</th>
             <th scope="col">Description</th>
@@ -111,7 +112,7 @@
     </thead>
 
     <tbody class="table-group-divider">
-    {% for relationship in ai_relationships %}
+    {% for relationship in technique_relationships %}
         
     <tr>
         <td>
@@ -131,14 +132,14 @@
         </td>
 
         <td>{{ relationship.target.type.name }}</td>
-
-        <td>{{ relationship.target.type.category.name }}</td>
+        <td>{{ relationship.target.subtype.name }}</td>
+        <td>{{ relationship.target.category.name }}</td>
         <td>{{ relationship.target.use.name }}</td>
         <td>{{ relationship.description }}</td>
 
         <td><a class="btn btn-primary"
-            href={%url 'ai-detail' relationship.target.pk %} role="button">More
-                Details About This AI
+            href={%url 'technique-detail' relationship.target.pk %} role="button">More
+                Details About This Technique
         </a></td>
 
     </tr>
