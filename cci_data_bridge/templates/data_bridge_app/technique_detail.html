@@ -1,37 +1,18 @@
 {% extends "base.html" %}
 
-{% block dataset-link %}<a class="nav-link active" href="{% url 'dataset-list'  %}">Datasets</a>{% endblock %}
+{% block technique-link %}<a class="nav-link active" href="{% url 'technique-list'  %}">Techniques</a>{% endblock %}
 
 {% block json-link %}
-<a class="nav-link active" href="{% url 'dataset-detail' dataset.id %}?format=json">View as JSON</a>
+<a class="nav-link active" href="{% url 'technique-detail' technique.id %}?format=json">View as JSON</a>
 {% endblock %}
 
 {% block content %}
 
-<h1 class="mt-2 mb-5">Dataset: <small>{{ object.url }}</small></h1>
+<h1 class="mt-2 mb-5">Technique</h1>
 
-<h2>Dataset Provider: <small>{{ dataset.dataset_provider }}</small></h2>
-
-<h2 class="mt-5">Date Range: <small>{{ dataset.start_date }} - {{ dataset.end_date }}</small></h2>
-
-<h2 class="mt-5">ECVs:</h2>
-
-<ul>
-    {% for ecv in dataset.ecvs.all %}
-    <li>{{ ecv }}</li>
-    {% endfor %}
-</ul>
-
-{% if dataset.filters.all %}
-<h2 class="mt-5">Filters:</h2>
-
-<ul>
-    {% for filter in dataset.filters.all %}
-    <li>{{ filter }}</li>
-    {% endfor %}
-</ul>
-
-{% endif %}
+<h2>Technique Type: <small>{{ ai.type.name }}</small></h2>
+<h2>Technique Category: <small>{{ ai.type.category.name }}</small></h2>
+<h2>Technique Use: <small>{{ ai.use.name }}</small></h2>
 
 <h2 class="mt-5">Related Datasets</h2>
 
@@ -41,6 +22,7 @@
         <tr>
             <th scope="col">Relationship</th>
             <th scope="col">Related Dataset</th>
+            <th scope="col">Dataset Provider</th>
             <th scope="col">Filters</th>
             <th scope="col">Description</th>
             <th scope="col">Start Date</th>
@@ -74,7 +56,7 @@
             data-bs-placement="top"
             data-bs-title="Go to the catalogue entry for this dataset. Opens a new window.">
                 {{ relationship.target.url }}</a></td>
-
+        <td>{{ relationship.target.dataset_provider }}</td>
         <td><ul>
         {% for filter in relationship.target.filters.all %}
         {{ filter.name }} = {{ filter.value }}<br/>
@@ -94,25 +76,20 @@
     </tbody>
 </table>
 
-{% if technique_relationships %}
-<h2 class="mt-5">Related Technique</h2>
+<h2 class="mt-5">Related Projects</h2>
 
-<table id="related_datasets"
+<table id="related_projects"
     class="table table-hover table-striped">
     <thead>
         <tr>
             <th scope="col">Relationship</th>
-            <th scope="col">Type</th>
-            <th scope="col">Subtype</th>
-            <th scope="col">Category</th>
-            <th scope="col">Use</th>
+            <th scope="col">Related Project</th>
             <th scope="col">Description</th>
-            <th scope="col"></th>
         </tr>
     </thead>
 
     <tbody class="table-group-divider">
-    {% for relationship in technique_relationships %}
+    {% for relationship in project_relationships %}
         
     <tr>
         <td>
@@ -131,26 +108,11 @@
         {% endfor %} 
         </td>
 
-        <td>{{ relationship.target.type.name }}</td>
-        <td>{{ relationship.target.subtype.name }}</td>
-        <td>{{ relationship.target.category.name }}</td>
-        <td>{{ relationship.target.use.name }}</td>
+        <td>{{ relationship.target.name }}</td>
         <td>{{ relationship.description }}</td>
-
-        <td><a class="btn btn-primary"
-            href={%url 'technique-detail' relationship.target.pk %} role="button">More
-                Details About This Technique
-        </a></td>
 
     </tr>
     {% endfor %}
     </tbody>
 </table>
-{% endif %}
-
-{% autoescape off %}
-{{ plot_div }}
-{% endautoescape %}
-
-<p class="ms-5">View the full <a href="{% url 'sankey' object.url %}">Sankey Diagram</a> for the {{ object.url }} dataset</p>
 {% endblock %}

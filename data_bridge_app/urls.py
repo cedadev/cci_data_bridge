@@ -13,8 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 
 from data_bridge_app import views
 
@@ -22,14 +23,24 @@ urlpatterns = [
     path("", views.HomeView.as_view()),
     path("admin/", admin.site.urls),
     path("dataset/", views.DatasetListView.as_view(), name="dataset-list"),
+    path("technique/", views.TechniqueListView.as_view(), name="technique-list"),
+    path("technique/<int:pk>", views.TechniqueDetailView.as_view(), name="technique-detail"),
     path("dataset/<int:pk>", views.DatasetDetailView.as_view(), name="dataset-detail"),
     path("dataset/<path:url>", views.DatasetUrlDetailView.as_view()),
-    path("project/", views.ProjectListView.as_view(), name="project-list"),
+    path(
+        "provider/",
+        views.DatasetProviderListView.as_view(),
+        name="provider-list",
+    ),
     path(
         "relationtype/", views.RelationTypeListView.as_view(), name="relation-type-list"
     ),
     path("sankey/", views.SankeyView.as_view(), name="sankey"),
-    path("sankey/<slug:project>", views.SankeyProjectView.as_view(), name="sankey"),
+    path(
+        "sankey/<slug:provider>",
+        views.SankeyDatasetProviderView.as_view(),
+        name="sankey",
+    ),
     path("sankey/<path:url>", views.SankeyDatasetView.as_view(), name="sankey"),
     path("docs/api", views.DocsApiView.as_view(), name="docs-api"),
 ]
