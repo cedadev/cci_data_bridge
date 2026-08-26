@@ -237,6 +237,7 @@ class JSONResponseMixin:
                     },
                     "related_ai_use": rel.target.use.name,
                     "related_ai_description": rel.target.use.name,
+                    "related_activity_type": "AI",
                     "description": rel.description,
                 }
 
