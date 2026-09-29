@@ -220,77 +220,79 @@ def _get_filters(w_sheet):
 
 def _write_techniques(w_sheet):
     for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
-        technique_category, _ = TechniqueCategory.objects.get_or_create(
-            name=row[TECHNIQUE_CATEGORY].value
-        )
-        technique_type, _ = TechniqueType.objects.get_or_create(
-            name=row[TECHNIQUE_TYPE].value
-        )
-        technique_subtype, _ = TechniqueSubtype.objects.get_or_create(
-            name=row[TECHNIQUE_SUBTYPE].value
-        )
+        if not all(cell.value is None for cell in row):
 
-        technique_use, _ = TechniqueUse.objects.get_or_create(
-            name=row[TECHNIQUE_USE].value
-        )
-
-        technique, _ = Technique.objects.get_or_create(
-            category=technique_category,
-            type=technique_type,
-            subtype=technique_subtype,
-            use=technique_use,
-        )
-
-        provider, _ = DatasetProvider.objects.get_or_create(
-            name=row[TECHNIQUE_PROVIDER].value
-        )
-        relationship_d_1 = None
-        relationship_d_2 = None
-        if row[TECHNIQUE_DATASET].value.strip() != "-":
-            dataset, _ = Dataset.objects.get_or_create(
-                url=row[TECHNIQUE_DATASET].value, dataset_provider=provider
+            technique_category, _ = TechniqueCategory.objects.get_or_create(
+                name=row[TECHNIQUE_CATEGORY].value
+            )
+            technique_type, _ = TechniqueType.objects.get_or_create(
+                name=row[TECHNIQUE_TYPE].value
+            )
+            technique_subtype, _ = TechniqueSubtype.objects.get_or_create(
+                name=row[TECHNIQUE_SUBTYPE].value
             )
 
-            relationship_d_1 = Relationship.objects.create(
-                source=dataset,
+            technique_use, _ = TechniqueUse.objects.get_or_create(
+                name=row[TECHNIQUE_USE].value
+            )
+
+            technique, _ = Technique.objects.get_or_create(
+                category=technique_category,
+                type=technique_type,
+                subtype=technique_subtype,
+                use=technique_use,
+            )
+
+            provider, _ = DatasetProvider.objects.get_or_create(
+                name=row[TECHNIQUE_PROVIDER].value
+            )
+            relationship_d_1 = None
+            relationship_d_2 = None
+            if row[TECHNIQUE_DATASET].value.strip() != "-":
+                dataset, _ = Dataset.objects.get_or_create(
+                    url=row[TECHNIQUE_DATASET].value, dataset_provider=provider
+                )
+
+                relationship_d_1 = Relationship.objects.create(
+                    source=dataset,
+                    target=technique,
+                    description=row[TECHNIQUE_DESCRIPTION].value or "",
+                )
+
+                relationship_d_2 = Relationship.objects.create(
+                    source=technique,
+                    target=dataset,
+                    description=row[TECHNIQUE_DESCRIPTION].value or "",
+                )
+
+            project, _ = Project.objects.get_or_create(
+                name=row[TECHNIQUE_PROJECT].value,
+                dataset_provider=provider,
+            )
+
+            relationship_p_1 = Relationship.objects.create(
+                source=project,
                 target=technique,
                 description=row[TECHNIQUE_DESCRIPTION].value or "",
             )
 
-            relationship_d_2 = Relationship.objects.create(
+            relationship_p_2 = Relationship.objects.create(
                 source=technique,
-                target=dataset,
+                target=project,
                 description=row[TECHNIQUE_DESCRIPTION].value or "",
             )
 
-        project, _ = Project.objects.get_or_create(
-            name=row[TECHNIQUE_PROJECT].value,
-            dataset_provider=provider,
-        )
+            for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_1].value):
+                relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
+                relationship_p_1.relationships.add(relationship_type)
+                if relationship_d_1:
+                    relationship_d_1.relationships.add(relationship_type)
 
-        relationship_p_1 = Relationship.objects.create(
-            source=project,
-            target=technique,
-            description=row[TECHNIQUE_DESCRIPTION].value or "",
-        )
-
-        relationship_p_2 = Relationship.objects.create(
-            source=technique,
-            target=project,
-            description=row[TECHNIQUE_DESCRIPTION].value or "",
-        )
-
-        for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_1].value):
-            relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_p_1.relationships.add(relationship_type)
-            if relationship_d_1:
-                relationship_d_1.relationships.add(relationship_type)
-
-        for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_2].value):
-            relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_p_2.relationships.add(relationship_type)
-            if relationship_d_2:
-                relationship_d_2.relationships.add(relationship_type)
+            for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_2].value):
+                relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
+                relationship_p_2.relationships.add(relationship_type)
+                if relationship_d_2:
+                    relationship_d_2.relationships.add(relationship_type)
 
 
 def _write_datasets(w_sheet, ecvs, filters, providers, related_types):
