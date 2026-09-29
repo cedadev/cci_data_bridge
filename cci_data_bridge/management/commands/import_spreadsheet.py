@@ -7,17 +7,17 @@ from openpyxl import load_workbook
 
 from data_bridge_app.models import (
     ECV,
-    Technique,
-    TechniqueCategory,
-    TechniqueSubtype,
-    TechniqueType,
-    TechniqueUse,
     Dataset,
     DatasetProvider,
     Filter,
     Project,
     Relationship,
     RelationType,
+    Technique,
+    TechniqueCategory,
+    TechniqueSubtype,
+    TechniqueType,
+    TechniqueUse,
 )
 
 ID_1 = 0
@@ -46,11 +46,11 @@ TECHNIQUE_USE = 8
 TECHNIQUE_DESCRIPTION = 9
 
 
-def get_from_github(dir: str, branch: str = "main"):
+def get_from_github(dir: str, filename: str, branch: str = "main"):
     import requests
 
     print(f"Downloading from Github: {branch}")
-    link = f"https://github.com/cedadev/cci_data_bridge_inputs/raw/refs/heads/{branch}/EEE2000-metadata_mapping.xlsx"
+    link = f"https://github.com/cedadev/cci_data_bridge_inputs/raw/refs/heads/{branch}/{filename}"
 
     resp = requests.get(link)
     with open(f"{dir}/testfile.xlsx", "wb") as f:
@@ -70,6 +70,14 @@ class Command(BaseCommand):
             nargs="?",
         )
         parser.add_argument(
+            "--technique_wb",
+            dest="technique_wb",
+            type=str,
+            help="The technique excel workbook to import",
+            default=None,
+            nargs="?",
+        )
+        parser.add_argument(
             "--dir", dest="dir", type=str, help="Temp Directory", default="/tmp"
         )
         parser.add_argument(
@@ -80,7 +88,14 @@ class Command(BaseCommand):
             default="main",
         )
 
-    def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
+    def handle(
+        self,
+        dir: str,
+        excel_wb: str | None,
+        technique_wb: str | None,
+        branch: str,
+        **kwargs,
+    ):
 
         if not os.path.isfile(str(settings.DATABASES["default"]["NAME"])):
             print(
@@ -94,7 +109,7 @@ class Command(BaseCommand):
 
         print("[info] Import data from spreadsheet")
         if not excel_wb:
-            excel_wb = get_from_github(dir, branch)
+            excel_wb = get_from_github(dir, "EEE2000-metadata_mapping.xlsx", branch)
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
@@ -104,7 +119,11 @@ class Command(BaseCommand):
         filters = _write_filters(w_sheet)
         _write_datasets(w_sheet, ecvs, filters, providers, related_types)
 
-        technique_w_sheet = w_book["Technique Mapping"]
+        if not technique_wb:
+            technique_wb = get_from_github(dir, "technique_overlay_inputs.xlsx", branch)
+        technique_book = load_workbook(filename=technique_wb)
+
+        technique_w_sheet = technique_book["Technique Mapping"]
         _write_techniques(technique_w_sheet)
 
         print("Database updated")
@@ -201,11 +220,19 @@ def _get_filters(w_sheet):
 
 def _write_techniques(w_sheet):
     for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
-        technique_category, _ = TechniqueCategory.objects.get_or_create(name=row[TECHNIQUE_CATEGORY].value)
-        technique_type, _ = TechniqueType.objects.get_or_create(name=row[TECHNIQUE_TYPE].value)
-        technique_subtype, _ = TechniqueSubtype.objects.get_or_create(name=row[TECHNIQUE_SUBTYPE].value)
+        technique_category, _ = TechniqueCategory.objects.get_or_create(
+            name=row[TECHNIQUE_CATEGORY].value
+        )
+        technique_type, _ = TechniqueType.objects.get_or_create(
+            name=row[TECHNIQUE_TYPE].value
+        )
+        technique_subtype, _ = TechniqueSubtype.objects.get_or_create(
+            name=row[TECHNIQUE_SUBTYPE].value
+        )
 
-        technique_use, _ = TechniqueUse.objects.get_or_create(name=row[TECHNIQUE_USE].value)
+        technique_use, _ = TechniqueUse.objects.get_or_create(
+            name=row[TECHNIQUE_USE].value
+        )
 
         technique, _ = Technique.objects.get_or_create(
             category=technique_category,
@@ -214,7 +241,9 @@ def _write_techniques(w_sheet):
             use=technique_use,
         )
 
-        provider, _ = DatasetProvider.objects.get_or_create(name=row[TECHNIQUE_PROVIDER].value)
+        provider, _ = DatasetProvider.objects.get_or_create(
+            name=row[TECHNIQUE_PROVIDER].value
+        )
         relationship_d_1 = None
         relationship_d_2 = None
         if row[TECHNIQUE_DATASET].value.strip() != "-":
