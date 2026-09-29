@@ -13,6 +13,8 @@ dataset for the url then display a detail view, otherwise display a list of data
 
 """
 
+import plotly.graph_objects as go
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.http.response import HttpResponse
@@ -23,10 +25,16 @@ from django.views.generic.base import RedirectView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from plotly.offline import plot
-import plotly.graph_objects as go
 
-from data_bridge_app.models import Dataset, ECV, Project, Relationship, RelationType
-
+from data_bridge_app.models import (
+    ECV,
+    Technique,
+    Dataset,
+    DatasetProvider,
+    Project,
+    Relationship,
+    RelationType,
+)
 
 SANKEY_COLOUR_1 = "rgba(230, 159, 0, 1.0)"
 SANKEY_COLOUR_2 = "rgba(86, 180, 233, 1.0)"
@@ -78,22 +86,55 @@ class JSONResponseMixin:
         """
         if context.get("object") is not None:
             return JsonResponse(
-                self.get_j_data(context["object"], context["relationships"]),
+                self.get_j_data(
+                    context,
+                ),
                 safe=False,
             )
 
         data = []
         for obj in context["object_list"]:
-            data.append(
-                self.get_j_data(obj, Relationship.objects.filter(from_dataset=obj))
-            )
+            data.append(self.get_j_data({"object": obj}))
 
         return JsonResponse(
             data,
             safe=False,
         )
 
-    def get_j_data(self, dataset, relationships):
+    def get_j_data(self, context):
+        if isinstance(context["object"], Technique):
+            return self.get_technique_json(context["object"])
+
+        return self.get_dataset_json(context["object"])
+
+    def get_technique_json(self, technique):
+        """
+        Returns an object that will be serialized as JSON by json.dumps().
+
+        """
+        data = {}
+        data["type"] = technique.type.name
+        data["subtype"] = technique.subtype.name
+        data["category"] = technique.category.name
+        data["use"] = technique.use.name
+        data["relationships"] = self.get_dataset_relationship_json(
+            dataset_relationships=technique.outgoing_relationships.filter(
+                target_content_type=ContentType.objects.get_for_model(Dataset),
+            )
+        )
+        data["relationships"].extend(
+            self.get_project_relationship_json(
+                project_relationships=technique.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(
+                        DatasetProvider
+                    ),
+                ),
+            )
+        )
+
+        return data
+
+    def get_dataset_json(self, dataset):
         """
         Returns an object that will be serialized as JSON by json.dumps().
 
@@ -115,43 +156,116 @@ class JSONResponseMixin:
         if len(filters) > 0:
             data["filters"] = filters
 
+        data["relationships"] = self.get_dataset_relationship_json(
+            dataset_relationships=dataset.outgoing_relationships.filter(
+                target_content_type=ContentType.objects.get_for_model(Dataset),
+            )
+        )
+
+        data["relationships"].extend(
+            self.get_technique_relationship_json(
+                technique_relationships=dataset.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(Technique),
+                ),
+            )
+        )
+
+        data["relationships"].extend(
+            self.get_project_relationship_json(
+                project_relationships=dataset.outgoing_relationships.filter(
+                    target_content_type=ContentType.objects.get_for_model(Project),
+                ),
+            )
+        )
+
+        return data
+
+    def get_dataset_relationship_json(self, dataset_relationships):
+
         combiened_relationships = {}
-        for rel in relationships:
+        for rel in dataset_relationships:
             # do we have an entry for this dataset id?
-            if rel.to_dataset.id in combiened_relationships.keys():
+            if rel.target.id in combiened_relationships.keys():
                 # add to existing data
-                combiened_relationships[rel.to_dataset.id]["relationship_types"].append(
+                combiened_relationships[rel.target.id]["relationship_types"].append(
                     str(rel)
                 )
             else:
                 # generate new relationship
                 relationship = {
                     "relationship_types": [str(rel)],
-                    "related_dataset": str(rel.to_dataset),
+                    "related_dataset": str(rel.target),
+                    "related_activity_type": "dataset",
                 }
 
-                if rel.to_dataset.start_date is not None:
-                    relationship[
-                        "related_dataset_start_date"
-                    ] = rel.to_dataset.start_date
+                if rel.target.start_date is not None:
+                    relationship["related_dataset_start_date"] = rel.target.start_date
 
-                if rel.to_dataset.end_date is not None:
-                    relationship["related_dataset_end_date"] = rel.to_dataset.end_date
+                if rel.target.end_date is not None:
+                    relationship["related_dataset_end_date"] = rel.target.end_date
 
-                relationship[
-                    "related_dataset_provider"
-                ] = rel.to_dataset.dataset_provider.name
+                relationship["related_dataset_provider"] = (
+                    rel.target.dataset_provider.name
+                )
                 relationship["description"] = rel.description
-                combiened_relationships[rel.to_dataset.id] = relationship
+                combiened_relationships[rel.target.id] = relationship
 
             filters = []
-            for filter_ in rel.to_dataset.filters.all():
+            for filter_ in rel.target.filters.all():
                 filters.append({filter_.name: filter_.value})
             if len(filters) > 0:
                 relationship["filters"] = filters
 
-        data["relationships"] = list(combiened_relationships.values())
-        return data
+        return list(combiened_relationships.values())
+
+    def get_technique_relationship_json(self, technique_relationships):
+
+        combiened_relationships = {}
+
+        for rel in technique_relationships:
+            # do we have an entry for this ai id?
+            if rel.target.id in combiened_relationships.keys():
+                # add to existing data
+                combiened_relationships[rel.target.id]["relationship_types"].append(
+                    str(rel)
+                )
+            else:
+                # generate new relationship
+                relationship = {
+                    "relationship_types": [str(rel)],
+                    "related_technique_use": rel.target.use.name,
+                    "related_technique_category": rel.target.category.name,
+                    "related_technique_type": rel.target.type.name,
+                    "related_technique_subtype": rel.target.subtype.name,
+                    "description": rel.description,
+                    "related_activity_type": "technique",
+                }
+
+                combiened_relationships[rel.target.id] = relationship
+
+        return list(combiened_relationships.values())
+
+    def get_project_relationship_json(self, project_relationships):
+
+        combiened_relationships = {}
+        for rel in project_relationships:
+            # do we have an entry for this ai id?
+            if rel.target.pk in combiened_relationships.keys():
+                # add to existing data
+                combiened_relationships[rel.target.id]["relationship_types"].append(
+                    str(rel)
+                )
+            else:
+                # generate new relationship
+                relationship = {
+                    "relationship_types": [str(rel)],
+                    "related_project": rel.target.name,
+                    "related_activity_type": "project",
+                }
+
+                combiened_relationships[rel.target.pk] = relationship
+
+        return list(combiened_relationships.values())
 
 
 class HomeView(TemplateView):
@@ -160,7 +274,7 @@ class HomeView(TemplateView):
 
 class DatasetListView(JSONResponseMixin, ListView):
     model = Dataset
-    template_name = 'dataset_list.html'
+    template_name = "dataset_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -182,7 +296,7 @@ class DatasetListView(JSONResponseMixin, ListView):
         provider = self.request.GET.get("provider")
         ecv = self.request.GET.get("ecv")
 
-        return get_queryset(url, filters, provider, ecv)
+        return get_dataset_queryset(url, filters, provider, ecv)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -192,7 +306,7 @@ class DatasetListView(JSONResponseMixin, ListView):
 
 class DatasetDetailView(JSONResponseMixin, DetailView):
     model = Dataset
-    template = 'dataset_detail.html'
+    template = "dataset_detail.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -209,11 +323,75 @@ class DatasetDetailView(JSONResponseMixin, DetailView):
         context = super().get_context_data(**kwargs)
         ds_id = self.kwargs["pk"]
         dataset = Dataset.objects.get(id=ds_id)
-        context["relationships"] = Relationship.objects.filter(from_dataset=dataset)
-
+        context["dataset_relationships"] = dataset.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Dataset),
+        )
+        context["technique_relationships"] = dataset.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Technique),
+        )
         title = f"Sankey Diagram for the {dataset.url} Dataset"
         snakey_diagram = SankeyDiagram([dataset], title)
         context["plot_div"] = snakey_diagram.plot_div()
+
+        return context
+
+
+class TechniqueListView(JSONResponseMixin, ListView):
+    model = Technique
+    template_name = "technique_list.html"
+
+    def render_to_response(self, context):
+        # Look for a 'format=json' GET argument
+        if (
+            self.request.GET.get("format") == "json"
+            or self.request.content_type == "application/json"
+        ):
+            return self.render_to_json_response(context)
+
+        if len(context["technique_list"]) == 1:
+            id_ = context["technique_list"][0].id
+            return redirect("technique-detail", pk=id_)
+
+        return super().render_to_response(context)
+
+    def get_queryset(self):
+        technique_type = self.request.GET.get("type")
+        technique_subtype = self.request.GET.get("subtype")
+        category = self.request.GET.get("category")
+        use = self.request.GET.get("use")
+
+        return get_technique_queryset(technique_type, technique_subtype, category, use)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class TechniqueDetailView(JSONResponseMixin, DetailView):
+    model = Technique
+    template = "technique_detail.html"
+
+    def render_to_response(self, context):
+        # Look for a 'format=json' GET argument
+        if (
+            self.request.GET.get("format") == "json"
+            or self.request.content_type == "application/json"
+        ):
+            return self.render_to_json_response(context)
+
+        # return html
+        return super().render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        technique_id = self.kwargs["pk"]
+        technique = Technique.objects.get(id=technique_id)
+        context["dataset_relationships"] = technique.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Dataset),
+        )
+        context["project_relationships"] = technique.outgoing_relationships.filter(
+            target_content_type=ContentType.objects.get_for_model(Project),
+        )
 
         return context
 
@@ -245,14 +423,11 @@ class DatasetUrlDetailView(JSONResponseMixin, ListView):
             # return html detail page
             dataset = context["object_list"][0]
             context["object"] = dataset
-            context["relationships"] = Relationship.objects.filter(from_dataset=dataset)
             title = f"Sankey Diagram for the {dataset.url} Dataset"
             snakey_diagram = SankeyDiagram([dataset], title)
             context["plot_div"] = snakey_diagram.plot_div()
 
-            return TemplateResponse(
-                self.request, "dataset_detail.html", context
-            )
+            return TemplateResponse(self.request, "dataset_detail.html", context)
 
         return super().render_to_response(context)
 
@@ -261,7 +436,7 @@ class DatasetUrlDetailView(JSONResponseMixin, ListView):
         return Dataset.objects.filter(url=url)
 
 
-def get_queryset(url=None, filters=None, provider=None, ecv=None):
+def get_dataset_queryset(url=None, filters=None, provider=None, ecv=None):
     if url is not None and url != "":
         # get the datasets for the given url
         datasets = Dataset.objects.all().filter(url=url)
@@ -314,13 +489,36 @@ def get_queryset(url=None, filters=None, provider=None, ecv=None):
     return datasets
 
 
+def get_technique_queryset(technique_type=None, subtype=None, category=None, use=None):
+    if technique_type is not None and technique_type != "":
+        # get the datasets for the given url
+        techniques = Technique.objects.all().filter(type_name=technique_type)
+    else:
+        # get all datasets
+        techniques = Technique.objects.all().order_by("type")
+
+    if subtype is not None and subtype != "":
+        # get the datasets for the given provider
+        techniques = techniques.filter(subtype_name=subtype)
+
+    if category is not None and category != "":
+        # get the datasets for the given provider
+        techniques = techniques.filter(category_name=category)
+
+    if use is not None and use != "":
+        # get the datasets for the given ecv
+        techniques = techniques.filter(use_name=use)
+
+    return techniques
+
+
 class DocsApiView(TemplateView):
     template_name = "api_doc.html"
 
 
-class ProjectListView(ListView):
-    model = Project
-    template_name = "project_list.html"
+class DatasetProviderListView(ListView):
+    model = DatasetProvider
+    template_name = "datasetprovider_list.html"
 
     def render_to_response(self, context):
         # Look for a 'format=json' GET argument
@@ -359,7 +557,7 @@ class SankeyView(RedirectView):
     template_name = "sankey.html"
 
 
-class SankeyProjectView(ImageResponseMixin, TemplateView):
+class SankeyDatasetProviderView(ImageResponseMixin, TemplateView):
     template_name = "sankey.html"
 
     def render_to_response(self, context):
@@ -368,21 +566,21 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
             self.request.GET.get("format") == "png"
             or self.request.content_type == "image/png"
         ):
-            filename = f"{context.get('project')}-sankey"
+            filename = f"{context.get('provider')}-sankey"
             return self.render_to_image_response(context, filename, "png")
         # Look for a 'format=svg' GET argument
         if (
             self.request.GET.get("format") == "svg"
             or self.request.content_type == "image/svg+xml"
         ):
-            filename = f"{context.get('project')}-sankey"
+            filename = f"{context.get('provider')}-sankey"
             return self.render_to_image_response(context, filename, "svg")
         # Look for a 'format=jpeg' GET argument
         if (
             self.request.GET.get("format") == "jpeg"
             or self.request.content_type == "image/jpeg"
         ):
-            filename = f"{context.get('project')}-sankey"
+            filename = f"{context.get('provider')}-sankey"
             return self.render_to_image_response(context, filename, "jpeg")
 
         # return html
@@ -391,9 +589,11 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
         return super().render_to_response(context)
 
     def get_context_data(self, *args, **kwargs):
-        context = super(SankeyProjectView, self).get_context_data(*args, **kwargs)
+        context = super(SankeyDatasetProviderView, self).get_context_data(
+            *args, **kwargs
+        )
 
-        project = self.kwargs["project"]
+        project = self.kwargs["provider"]
         if project.lower() == "cci":
             datasets = Dataset.objects.filter(
                 Q(dataset_provider="CCI Open Data Portal")
@@ -414,7 +614,7 @@ class SankeyProjectView(ImageResponseMixin, TemplateView):
             datasets = Dataset.objects.filter(ecvs=project)
 
         if len(datasets.all()) == 0:
-            raise Http404(f"Project not found - Database empty")
+            raise Http404(f"Dataset Provider not found - Database empty")
 
         title = f"Sankey Diagram for {project} Datasets"
         snakey_diagram = SankeyDiagram(datasets, title)
@@ -536,7 +736,9 @@ class SankeyDiagram:
             # loop round all of the dataset(s)
             # this could be all datasets for a URL, all CS3 datasets or all CCI datasets
 
-            for relationship in dataset.relationship_set.all():
+            for relationship in dataset.outgoing_relationships.filter(
+                target_content_type=ContentType.objects.get_for_model(Dataset)
+            ):
                 # now loop round all of the relationships for this dataset
                 source_index = self._get_index(
                     dataset.url, f"Dataset: {dataset}", SANKEY_COLOUR_1
@@ -545,7 +747,7 @@ class SankeyDiagram:
 
                 if len(dataset.filters.all()) == 0:
                     # No filters on the prime datasets
-                    related_ds = relationship.to_dataset
+                    related_ds = relationship.target
                     if len(related_ds.filters.all()) > 0:
                         filter_index = self._add_filters(
                             related_ds,
@@ -580,7 +782,7 @@ class SankeyDiagram:
                         relationship,
                     )
 
-                    related_ds = relationship.to_dataset
+                    related_ds = relationship.target
 
                     if len(related_ds.filters.all()) > 0:
                         filter_index = self._add_filters(

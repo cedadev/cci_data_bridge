@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block provider-link %}
+<a class="nav-link active" href="{% url 'provider-list'  %}">Dataset Providers</a>
+{% endblock %}
+{% block json-link %}
+<a class="nav-link active" href="{% url 'provider-list' %}?format=json">View as JSON</a>
+{% endblock %}
+
+{% block content %}
+<h1 class="mt-2 mb-4">Dataset Providers</h1>
+
+<table id="result_list"
+    class="table table-hover table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Dataset Provider</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        {% for dataset_provider in datasetprovider_list %}
+        <tr>
+            <td><a href="{% url 'dataset-list' %}?provider={{dataset_provider.name }}">{{ dataset_provider.name }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
