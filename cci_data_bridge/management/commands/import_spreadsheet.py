@@ -248,7 +248,10 @@ def _write_techniques(w_sheet):
             )
             relationship_d_1 = None
             relationship_d_2 = None
-            if row[TECHNIQUE_DATASET].value.strip() != "-":
+            if (
+                row[TECHNIQUE_DATASET].value is not None
+                and row[TECHNIQUE_DATASET].value.strip() != "-"
+            ):
                 dataset, _ = Dataset.objects.get_or_create(
                     url=row[TECHNIQUE_DATASET].value, dataset_provider=provider
                 )
