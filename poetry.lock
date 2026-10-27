@@ -168,8 +168,8 @@ pyyaml = "^6.0.1"
 [package.source]
 type = "git"
 url = "https://github.com/cedadev/django-flexi-settings.git"
-reference = "0.1.3"
-resolved_reference = "eb24d17a0e0897edeb53c820df50aa478368dec8"
+reference = "0.2.0"
+resolved_reference = "68eb74b00e28448279e7d800889d6e39466bf0ce"
 
 [[package]]
 name = "et-xmlfile"
@@ -518,4 +518,4 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4"
-content-hash = "5c43b3e4e6cbabee22937e6b47b23258f663100678e005765c20d57a2d271d36"
+content-hash = "68f4a54ba202194d38ef19332ff35ef10a2e421b9a3240d2b89997877942ebb8"
