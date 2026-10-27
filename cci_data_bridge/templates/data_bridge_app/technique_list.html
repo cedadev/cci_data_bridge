@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block technique-link %}<a class="nav-link active" href="{% url 'technique-list'  %}">Techniques</a>{% endblock %}
+
+{% block json-link %}
+{% if '?' in request.get_full_path %}
+<a class="nav-link active" href="{{ request.get_full_path }}&format=json">View as JSON</a>
+{% else %}     
+<a class="nav-link active" href="{{ request.get_full_path }}?format=json">View as JSON</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1 class="mt-2 mb-4">Techniques</h1>
+
+<table id="result_list"
+    class="table table-hover table-striped table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Subtype</th>
+            <th scope="col">Category</th>
+            <th scope="col">Use</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        {% for technique in technique_list %}
+        <tr>
+            <td>{{ technique.type.name }}</td>
+            <td>{{ technique.subtype.name }}</td>
+            <td>{{ technique.category.name }}</td>
+            <td>{{ technique.use.name }}</td>
+
+            <td><a class="btn btn-primary"
+                href={%url 'technique-detail' technique.pk %} role="button">More
+                    Details</a></td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
