@@ -1,21 +1,23 @@
-from django.core.management.base import BaseCommand
-from openpyxl import load_workbook
+import os
 
 from django.conf import settings
 from django.core import management
-import os
+from django.core.management.base import BaseCommand
+from openpyxl import load_workbook
 
 from data_bridge_app.models import (
     ECV,
-    Ai,
-    AiCategory,
-    AiType,
-    AiUse,
     Dataset,
+    DatasetProvider,
     Filter,
     Project,
     Relationship,
     RelationType,
+    Technique,
+    TechniqueCategory,
+    TechniqueSubtype,
+    TechniqueType,
+    TechniqueUse,
 )
 
 ID_1 = 0
@@ -32,21 +34,23 @@ PROVIDER_2 = 10
 ECV_2 = 11
 DESCRIPTION = 12
 
-AI_PROJECT = 0
-AI_DATASET = 1
-AI_RELATIONSHIP_1 = 2
-AI_RELATIONSHIP_2 = 3
-AI_TYPE = 4
-AI_CATEGORY = 5
-AI_USE = 6
-AI_DESCRIPTION = 7
+TECHNIQUE_PROVIDER = 0
+TECHNIQUE_PROJECT = 1
+TECHNIQUE_DATASET = 2
+TECHNIQUE_RELATIONSHIP_1 = 3
+TECHNIQUE_RELATIONSHIP_2 = 4
+TECHNIQUE_TYPE = 5
+TECHNIQUE_SUBTYPE = 6
+TECHNIQUE_CATEGORY = 7
+TECHNIQUE_USE = 8
+TECHNIQUE_DESCRIPTION = 9
 
 
-def get_from_github(dir: str, branch: str = 'main'):
+def get_from_github(dir: str, filename: str, branch: str = "main"):
     import requests
 
     print(f"Downloading from Github: {branch}")
-    link = f"https://github.com/cedadev/cci_data_bridge_inputs/raw/refs/heads/{branch}/EEE2000-metadata_mapping.xlsx"
+    link = f"https://github.com/cedadev/cci_data_bridge_inputs/raw/refs/heads/{branch}/{filename}"
 
     resp = requests.get(link)
     with open(f"{dir}/testfile.xlsx", "wb") as f:
@@ -66,23 +70,46 @@ class Command(BaseCommand):
             nargs="?",
         )
         parser.add_argument(
+            "--technique_wb",
+            dest="technique_wb",
+            type=str,
+            help="The technique excel workbook to import",
+            default=None,
+            nargs="?",
+        )
+        parser.add_argument(
             "--dir", dest="dir", type=str, help="Temp Directory", default="/tmp"
         )
         parser.add_argument(
-            '--branch', dest='branch', type=str, help='Data Inputs branch', default='main'
+            "--branch",
+            dest="branch",
+            type=str,
+            help="Data Inputs branch",
+            default="main",
         )
 
-    def handle(self, dir: str, excel_wb: str | None, branch: str, **kwargs):
+    def handle(
+        self,
+        dir: str,
+        excel_wb: str | None,
+        technique_wb: str | None,
+        branch: str,
+        **kwargs,
+    ):
 
-        if not os.path.isfile(str(settings.DATABASES['default']['NAME'])):
-            print(f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}")
-            management.call_command('migrate', interactive=False)
+        if not os.path.isfile(str(settings.DATABASES["default"]["NAME"])):
+            print(
+                f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}"
+            )
+            management.call_command("migrate", interactive=False)
         else:
-            print(f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}")
+            print(
+                f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}"
+            )
 
         print("[info] Import data from spreadsheet")
         if not excel_wb:
-            excel_wb = get_from_github(dir, branch)
+            excel_wb = get_from_github(dir, "EEE2000-metadata_mapping.xlsx", branch)
         _clean()
         w_book = load_workbook(filename=excel_wb)
         related_types = _write_related_types(w_book)
@@ -92,8 +119,12 @@ class Command(BaseCommand):
         filters = _write_filters(w_sheet)
         _write_datasets(w_sheet, ecvs, filters, providers, related_types)
 
-        ai_w_sheet = w_book["AI Mapping"]
-        _write_ais(ai_w_sheet)
+        if not technique_wb:
+            technique_wb = get_from_github(dir, "technique_overlay_inputs.xlsx", branch)
+        technique_book = load_workbook(filename=technique_wb)
+
+        technique_w_sheet = technique_book["Technique Mapping"]
+        _write_techniques(technique_w_sheet)
 
         print("Database updated")
 
@@ -102,13 +133,14 @@ def _clean():
     Dataset.objects.all().delete()
     ECV.objects.all().delete()
     Filter.objects.all().delete()
-    Project.objects.all().delete()
+    DatasetProvider.objects.all().delete()
     RelationType.objects.all().delete()
     Relationship.objects.all().delete()
-    Ai.objects.all().delete()
-    AiType.objects.all().delete()
-    AiCategory.objects.all().delete()
-    AiUse.objects.all().delete()
+    Technique.objects.all().delete()
+    TechniqueType.objects.all().delete()
+    TechniqueSubtype.objects.all().delete()
+    TechniqueCategory.objects.all().delete()
+    TechniqueUse.objects.all().delete()
 
 
 def _write_related_types(w_book):
@@ -128,18 +160,18 @@ def _write_related_types(w_book):
 
 def _write_providers():
     providers = {}
-    providers["C3S Climate Data Store"] = Project.objects.create(
+    providers["C3S Climate Data Store"] = DatasetProvider.objects.create(
         name="C3S Climate Data Store"
     )
-    providers["CCI Open Data Portal"] = Project.objects.create(
+    providers["CCI Open Data Portal"] = DatasetProvider.objects.create(
         name="CCI Open Data Portal"
     )
-    providers["CCI Archive on CEDA"] = Project.objects.create(
+    providers["CCI Archive on CEDA"] = DatasetProvider.objects.create(
         name="CCI Archive on CEDA"
     )
-    providers["OSI SAF"] = Project.objects.create(name="OSI SAF")
-    providers["CM SAF"] = Project.objects.create(name="CM SAF")
-    providers["RECCAP-2"] = Project.objects.create(name="RECCAP-2")
+    providers["OSI SAF"] = DatasetProvider.objects.create(name="OSI SAF")
+    providers["CM SAF"] = DatasetProvider.objects.create(name="CM SAF")
+    providers["RECCAP-2"] = DatasetProvider.objects.create(name="RECCAP-2")
     return providers
 
 
@@ -186,47 +218,84 @@ def _get_filters(w_sheet):
     return filters
 
 
-def _write_ai_categories(w_sheet):
-    for row in w_sheet.iter_rows(min_row=3, max_col=9, max_row=w_sheet.max_row):
-        ai_category = Ai.objects.create(row[FILTER_1].value)
-
-
-def _write_ais(w_sheet):
+def _write_techniques(w_sheet):
     for row in w_sheet.iter_rows(min_row=3, max_col=13, max_row=w_sheet.max_row):
-        ai_category, _ = AiCategory.objects.get_or_create(name=row[AI_CATEGORY].value)
-        ai_type, _ = AiType.objects.get_or_create(
-            name=row[AI_TYPE].value, category=ai_category
-        )
-        ai_use, _ = AiUse.objects.get_or_create(name=row[AI_USE].value)
-        ai, _ = Ai.objects.get_or_create(use=ai_use, type=ai_type)
+        if not all(cell.value is None for cell in row):
 
-        provider, _ = Project.objects.get_or_create(name=row[AI_PROJECT].value)
-        if row[AI_DATASET].value.strip() != "-":
-            source, _ = Dataset.objects.get_or_create(
-                url=row[AI_DATASET].value, dataset_provider=provider
+            technique_category, _ = TechniqueCategory.objects.get_or_create(
+                name=row[TECHNIQUE_CATEGORY].value
             )
-        else:
-            source = provider
+            technique_type, _ = TechniqueType.objects.get_or_create(
+                name=row[TECHNIQUE_TYPE].value
+            )
+            technique_subtype, _ = TechniqueSubtype.objects.get_or_create(
+                name=row[TECHNIQUE_SUBTYPE].value
+            )
 
-        relationship_1 = Relationship.objects.create(
-            source=source,
-            target=ai,
-            description=row[AI_DESCRIPTION].value or "",
-        )
+            technique_use, _ = TechniqueUse.objects.get_or_create(
+                name=row[TECHNIQUE_USE].value
+            )
 
-        for rel_type in _get_values(row[AI_RELATIONSHIP_1].value):
-            relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_1.relationships.add(relationship_type)
+            technique, _ = Technique.objects.get_or_create(
+                category=technique_category,
+                type=technique_type,
+                subtype=technique_subtype,
+                use=technique_use,
+            )
 
-        relationship_2 = Relationship.objects.create(
-            source=ai,
-            target=source,
-            description=row[AI_DESCRIPTION].value or "",
-        )
+            provider, _ = DatasetProvider.objects.get_or_create(
+                name=row[TECHNIQUE_PROVIDER].value
+            )
+            relationship_d_1 = None
+            relationship_d_2 = None
+            if (
+                row[TECHNIQUE_DATASET].value is not None
+                and row[TECHNIQUE_DATASET].value.strip() != "-"
+            ):
+                dataset, _ = Dataset.objects.get_or_create(
+                    url=row[TECHNIQUE_DATASET].value, dataset_provider=provider
+                )
 
-        for rel_type in _get_values(row[AI_RELATIONSHIP_2].value):
-            relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
-            relationship_2.relationships.add(relationship_type)
+                relationship_d_1 = Relationship.objects.create(
+                    source=dataset,
+                    target=technique,
+                    description=row[TECHNIQUE_DESCRIPTION].value or "",
+                )
+
+                relationship_d_2 = Relationship.objects.create(
+                    source=technique,
+                    target=dataset,
+                    description=row[TECHNIQUE_DESCRIPTION].value or "",
+                )
+
+            project, _ = Project.objects.get_or_create(
+                name=row[TECHNIQUE_PROJECT].value,
+                dataset_provider=provider,
+            )
+
+            relationship_p_1 = Relationship.objects.create(
+                source=project,
+                target=technique,
+                description=row[TECHNIQUE_DESCRIPTION].value or "",
+            )
+
+            relationship_p_2 = Relationship.objects.create(
+                source=technique,
+                target=project,
+                description=row[TECHNIQUE_DESCRIPTION].value or "",
+            )
+
+            for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_1].value):
+                relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
+                relationship_p_1.relationships.add(relationship_type)
+                if relationship_d_1:
+                    relationship_d_1.relationships.add(relationship_type)
+
+            for rel_type in _get_values(row[TECHNIQUE_RELATIONSHIP_2].value):
+                relationship_type, _ = RelationType.objects.get_or_create(name=rel_type)
+                relationship_p_2.relationships.add(relationship_type)
+                if relationship_d_2:
+                    relationship_d_2.relationships.add(relationship_type)
 
 
 def _write_datasets(w_sheet, ecvs, filters, providers, related_types):

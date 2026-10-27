@@ -5,8 +5,8 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from data_bridge_app.models import (
     ECV,
     Dataset,
+    DatasetProvider,
     Filter,
-    Project,
     Relationship,
     RelationType,
 )
@@ -46,8 +46,8 @@ class ECVAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
+@admin.register(DatasetProvider)
+class DatasetProviderAdmin(admin.ModelAdmin):
     pass
 
 
