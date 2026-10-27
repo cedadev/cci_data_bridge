@@ -21,7 +21,6 @@ from data_bridge_app import views
 
 urlpatterns = [
     path("", views.HomeView.as_view()),
-    path("admin/", admin.site.urls),
     path("dataset/", views.DatasetListView.as_view(), name="dataset-list"),
     path("technique/", views.TechniqueListView.as_view(), name="technique-list"),
     path("technique/<int:pk>", views.TechniqueDetailView.as_view(), name="technique-detail"),
