@@ -23,7 +23,7 @@ class Relationship(models.Model):
         on_delete=models.CASCADE,
         related_name="+",
     )
-    source_object_pk = models.CharField()
+    source_object_pk = models.CharField(max_length=300)
     source = GenericForeignKey(
         "source_content_type",
         "source_object_pk",
@@ -34,7 +34,7 @@ class Relationship(models.Model):
         on_delete=models.CASCADE,
         related_name="+",
     )
-    target_object_pk = models.CharField()
+    target_object_pk = models.CharField(max_length=300)
     target = GenericForeignKey(
         "target_content_type",
         "target_object_pk",
