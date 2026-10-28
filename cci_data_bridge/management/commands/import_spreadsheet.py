@@ -1,3 +1,4 @@
+from django.core import management
 from django.core.management.base import BaseCommand
 from openpyxl import load_workbook
 
@@ -42,6 +43,15 @@ class Command(BaseCommand):
         parser.add_argument("--dir", dest="dir", type=str, help="Temp Directory", default="/tmp")
 
     def handle(self, dir: str, excel_wb: str | None, **kwargs):
+        if not os.path.isfile(str(settings.DATABASES["default"]["NAME"])):
+            print(
+                f"[info] Migrating database to {str(settings.DATABASES['default']['NAME'])}"
+            )
+            management.call_command("migrate", interactive=False)
+        else:
+            print(
+                f"[info] Skipping migration for database at {str(settings.DATABASES['default']['NAME'])}"
+            )
         print("Import data from spreadsheet")
         if not excel_wb:
             excel_wb = get_from_github(dir)
